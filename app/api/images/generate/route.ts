@@ -76,8 +76,10 @@ export async function POST(request: Request) {
   }
 
   try {
+    console.log('[bella-imagem] Iniciando geração — tenant:', profile.tenant_id, 'model:', 'gemini-3.1-flash-image-preview')
     // Gera imagens com Gemini
     const result = await generateFashionImages(body, tenant as Tenant)
+    console.log('[bella-imagem] Gemini retornou — tempo:', result.generationTimeMs, 'ms')
 
     // Faz upload das 2 variações no Supabase Storage
     const outputUrls: string[] = []
@@ -162,6 +164,16 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro desconhecido'
+    const stack = err instanceof Error ? err.stack : ''
+
+    // Log detalhado no servidor (aparece no Vercel Functions log)
+    console.error('[bella-imagem] generate-image ERRO:', {
+      message,
+      stack,
+      tenantId: profile.tenant_id,
+      userId: user.id,
+      imageRecordId: imageRecord.id,
+    })
 
     // Atualiza registro como falha
     await admin
@@ -179,6 +191,9 @@ export async function POST(request: Request) {
       error_message: message,
     })
 
-    return NextResponse.json({ error: 'Falha na geração da imagem. Tente novamente.' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Falha na geração da imagem. Tente novamente.',
+      detail: message,
+    }, { status: 500 })
   }
 }
