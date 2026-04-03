@@ -94,7 +94,6 @@ export default async function GaleriaPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-white text-bella-charcoal p-2 rounded-lg hover:bg-gray-100 transition"
-                        onClick={(e) => e.stopPropagation()}
                       >
                         <Download className="w-4 h-4" />
                       </a>
