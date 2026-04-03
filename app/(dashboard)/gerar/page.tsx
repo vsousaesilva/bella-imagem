@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { compressImage } from '@/lib/utils'
 import { BACKGROUND_PRESETS, ASPECT_RATIO_OPTIONS } from '@/lib/types'
 import type { AspectRatio } from '@/lib/types'
@@ -13,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronDown,
+  Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +27,7 @@ interface GenerationResult {
 }
 
 export default function GerarImagemPage() {
+  const router = useRouter()
   const [step, setStep] = useState<Step>('form')
   const [error, setError] = useState<string | null>(null)
 
@@ -42,6 +45,7 @@ export default function GerarImagemPage() {
   const [result, setResult] = useState<GenerationResult | null>(null)
   const [selectedVariation, setSelectedVariation] = useState<0 | 1>(0)
   const [captionText, setCaptionText] = useState<string | null>(null)
+  const [captionError, setCaptionError] = useState<string | null>(null)
   const [generatingCaption, setGeneratingCaption] = useState(false)
 
   const clothingInputRef = useRef<HTMLInputElement>(null)
@@ -104,6 +108,7 @@ export default function GerarImagemPage() {
       })
       setSelectedVariation(0)
       setStep('result')
+      router.refresh() // atualiza cota na sidebar
     } catch (err) {
       setError('Erro inesperado. Tente novamente.')
       setStep('form')
@@ -126,6 +131,7 @@ export default function GerarImagemPage() {
   async function handleGenerateCaption() {
     if (!result) return
     setGeneratingCaption(true)
+    setCaptionError(null)
 
     const res = await fetch('/api/captions/generate', {
       method: 'POST',
@@ -134,7 +140,12 @@ export default function GerarImagemPage() {
     })
 
     const data = await res.json()
-    setCaptionText(data.caption ?? null)
+
+    if (!res.ok) {
+      setCaptionError(data.error ?? 'Erro ao gerar legenda.')
+    } else {
+      setCaptionText(data.caption ?? null)
+    }
     setGeneratingCaption(false)
   }
 
@@ -161,6 +172,7 @@ export default function GerarImagemPage() {
         selectedVariation={selectedVariation}
         onSelectVariation={handleSelectVariation}
         captionText={captionText}
+        captionError={captionError}
         generatingCaption={generatingCaption}
         onGenerateCaption={handleGenerateCaption}
         onNewGeneration={handleNewGeneration}
@@ -416,6 +428,7 @@ function ResultState({
   selectedVariation,
   onSelectVariation,
   captionText,
+  captionError,
   generatingCaption,
   onGenerateCaption,
   onNewGeneration,
@@ -424,6 +437,7 @@ function ResultState({
   selectedVariation: 0 | 1
   onSelectVariation: (i: 0 | 1) => void
   captionText: string | null
+  captionError: string | null
   generatingCaption: boolean
   onGenerateCaption: () => void
   onNewGeneration: () => void
@@ -496,7 +510,7 @@ function ResultState({
           Baixar variação {selectedVariation + 1}
         </a>
 
-        {!captionText && (
+        {!captionText && !captionError && (
           <button
             onClick={onGenerateCaption}
             disabled={generatingCaption}
@@ -505,6 +519,13 @@ function ResultState({
             <Sparkles className="w-4 h-4" />
             {generatingCaption ? 'Gerando legenda...' : 'Gerar legenda'}
           </button>
+        )}
+
+        {captionError && (
+          <div className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+            <Lock className="w-4 h-4 flex-shrink-0" />
+            {captionError}
+          </div>
         )}
       </div>
 
