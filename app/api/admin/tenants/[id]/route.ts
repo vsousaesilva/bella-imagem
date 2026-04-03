@@ -4,8 +4,10 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 /** GET — retorna tenant + usuários para o painel master (bypassa RLS via admin client) */
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
@@ -24,7 +26,7 @@ export async function GET(
   const { data: tenant } = await admin
     .from('tenants')
     .select('id, name, slug, plan, active, business_name, business_segment')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!tenant) return NextResponse.json({ error: 'Empresa não encontrada' }, { status: 404 })
@@ -32,7 +34,7 @@ export async function GET(
   const { data: users } = await admin
     .from('profiles')
     .select('id, full_name, role, active')
-    .eq('tenant_id', params.id)
+    .eq('tenant_id', id)
 
   return NextResponse.json({ tenant, users: users ?? [] })
 }
