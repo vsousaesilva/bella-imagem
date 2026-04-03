@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatCostUsd } from '@/lib/utils'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
