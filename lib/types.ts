@@ -247,8 +247,8 @@ export const PLAN_LABELS: Record<PlanType, string> = {
 }
 
 export const PLAN_COLORS: Record<PlanType, string> = {
-  free: 'bg-slate-100 text-slate-700',
-  starter: 'bg-blue-100 text-blue-700',
-  pro: 'bg-purple-100 text-purple-700',
-  business: 'bg-amber-100 text-amber-700',
+  free:     'bg-white/[0.06] text-bella-gray-light',
+  starter:  'bg-blue-500/[0.12] text-blue-300',
+  pro:      'bg-purple-500/[0.12] text-purple-300',
+  business: 'bg-bella-gold/[0.15] text-bella-gold',
 }

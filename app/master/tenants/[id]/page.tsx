@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import type { PlanType, UserRole } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Save, ArrowLeft, UserPlus, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Save, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 interface TenantData {
   id: string
@@ -23,13 +22,11 @@ interface UserData {
   full_name: string | null
   role: UserRole
   active: boolean
-  email?: string
 }
 
 export default function EditTenantPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const supabase = createClient()
 
   const [tenant, setTenant] = useState<TenantData | null>(null)
   const [users, setUsers] = useState<UserData[]>([])
@@ -37,32 +34,24 @@ export default function EditTenantPage() {
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
-  // Form state
   const [name, setName] = useState('')
   const [plan, setPlan] = useState<PlanType>('free')
   const [active, setActive] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const { data: t } = await supabase
-        .from('tenants')
-        .select('id, name, slug, plan, active, business_name, business_segment')
-        .eq('id', id)
-        .single()
+      // Usa o endpoint admin para bypassar RLS (master tem tenant_id = null)
+      const res = await fetch(`/api/admin/tenants/${id}`)
+      const data = await res.json()
 
-      if (t) {
-        setTenant(t as TenantData)
-        setName(t.name)
-        setPlan(t.plan as PlanType)
-        setActive(t.active)
+      if (data.tenant) {
+        setTenant(data.tenant)
+        setName(data.tenant.name)
+        setPlan(data.tenant.plan as PlanType)
+        setActive(data.tenant.active)
       }
 
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, role, active')
-        .eq('tenant_id', id)
-
-      setUsers((profiles ?? []) as UserData[])
+      setUsers(data.users ?? [])
       setLoading(false)
     }
     load()
@@ -95,9 +84,7 @@ export default function EditTenantPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, active: !currentActive }),
     })
-    if (res.ok) {
-      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, active: !currentActive } : u))
-    }
+    if (res.ok) setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, active: !currentActive } : u))
   }
 
   async function handleChangeRole(userId: string, role: UserRole) {
@@ -106,43 +93,59 @@ export default function EditTenantPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, role }),
     })
-    if (res.ok) {
-      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role } : u))
-    }
+    if (res.ok) setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role } : u))
   }
 
-  if (loading) return <div className="p-8 text-gray-400">Carregando...</div>
-  if (!tenant) return <div className="p-8 text-red-500">Empresa não encontrada.</div>
+  if (loading) {
+    return (
+      <div className="p-8 max-w-3xl mx-auto">
+        <div className="h-6 w-32 rounded-xl shimmer mb-8" />
+        <div className="h-10 w-64 rounded-xl shimmer mb-4" />
+        <div className="rounded-2xl p-6 h-48 shimmer" />
+      </div>
+    )
+  }
+
+  if (!tenant) {
+    return (
+      <div className="p-8 text-sm" style={{ color: '#f87171' }}>
+        Empresa não encontrada.
+      </div>
+    )
+  }
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <button
         onClick={() => router.push('/master/tenants')}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-bella-charcoal mb-6 transition"
+        className="flex items-center gap-2 text-sm text-bella-gray hover:text-bella-gold mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Voltar para empresas
       </button>
 
-      <h1 className="text-2xl font-bold tracking-tight text-bella-charcoal mb-1">{tenant.name}</h1>
-      <p className="text-xs text-gray-400 mb-8">slug: {tenant.slug}</p>
+      <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight mb-0.5">{tenant.name}</h1>
+      <p className="text-[11px] text-bella-gray mb-8">slug: {tenant.slug}</p>
 
       {feedback && (
-        <div className={cn(
-          'flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-6',
-          feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
-        )}>
+        <div
+          className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-6"
+          style={feedback.type === 'success'
+            ? { background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80' }
+            : { background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }
+          }
+        >
           {feedback.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
           {feedback.msg}
         </div>
       )}
 
       {/* Dados da empresa */}
-      <section className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="font-semibold text-bella-charcoal mb-5">Dados da empresa</h2>
-        <div className="space-y-4">
+      <section className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <h2 className="font-medium text-bella-white mb-5">Dados da empresa</h2>
+        <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome</label>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-2">Nome</label>
             <input
               type="text"
               value={name}
@@ -152,88 +155,84 @@ export default function EditTenantPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Plano</label>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-3">Plano</label>
             <div className="flex flex-wrap gap-2">
               {(['free', 'starter', 'pro', 'business'] as PlanType[]).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPlan(p)}
-                  className={cn(
-                    'px-4 py-2 rounded-xl border text-sm transition font-medium',
-                    plan === p
-                      ? `${PLAN_COLORS[p]} border-transparent`
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  )}
+                  className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                  style={plan === p
+                    ? { background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.4)', color: '#c9a96e' }
+                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+                  }
                 >
                   {PLAN_LABELS[p]}
                 </button>
               ))}
             </div>
+            <p className="text-[11px] text-bella-gray mt-2">
+              Plano atual: <span className={cn('px-1.5 py-0.5 rounded text-[10px] font-medium', PLAN_COLORS[plan])}>{PLAN_LABELS[plan]}</span>
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setActive(!active)}
-              className={cn(
-                'relative w-11 h-6 rounded-full transition',
-                active ? 'bg-bella-rose' : 'bg-gray-200'
-              )}
+              className="relative w-11 h-6 rounded-full transition-all duration-200"
+              style={{ background: active ? 'linear-gradient(135deg, #c9a96e, #dfc9a0)' : 'rgba(255,255,255,0.1)' }}
             >
-              <span className={cn(
-                'absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all',
-                active ? 'left-6' : 'left-1'
-              )} />
+              <span
+                className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+                style={{ left: active ? '1.5rem' : '0.25rem' }}
+              />
             </button>
-            <span className="text-sm text-gray-700">
-              Empresa {active ? 'ativa' : 'inativa'}
+            <span className="text-sm text-bella-gray">
+              Empresa <span className={active ? 'text-green-400' : 'text-bella-gray'}>{active ? 'ativa' : 'inativa'}</span>
             </span>
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="mt-6 flex items-center gap-2 bg-bella-rose text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-bella-rose-dark transition disabled:opacity-60"
-        >
+        <button onClick={handleSave} disabled={saving} className="btn-primary mt-6">
           <Save className="w-4 h-4" />
-          {saving ? 'Salvando...' : 'Salvar alterações'}
+          <span>{saving ? 'Salvando...' : 'Salvar alterações'}</span>
         </button>
       </section>
 
       {/* Usuários */}
-      <section className="bg-white rounded-2xl border border-gray-100 p-6">
+      <section className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-semibold text-bella-charcoal">Usuários</h2>
-          <span className="text-xs text-gray-400">{users.length} usuário(s)</span>
+          <h2 className="font-medium text-bella-white">Usuários</h2>
+          <span className="text-[11px] text-bella-gray">{users.length} usuário(s)</span>
         </div>
 
         {!users.length ? (
-          <p className="text-sm text-gray-400">Nenhum usuário vinculado.</p>
+          <p className="text-sm text-bella-gray">Nenhum usuário vinculado.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {users.map((u) => (
-              <div key={u.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+              <div key={u.id} className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                 <div>
-                  <p className="text-sm font-medium text-bella-charcoal">{u.full_name ?? '—'}</p>
-                  <p className="text-xs text-gray-400 capitalize">{u.role}</p>
+                  <p className="text-sm font-medium text-bella-white">{u.full_name ?? '—'}</p>
+                  <p className="text-[11px] text-bella-gray capitalize">{u.role}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <select
                     value={u.role}
                     onChange={(e) => handleChangeRole(u.id, e.target.value as UserRole)}
-                    className="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:outline-none focus:border-bella-rose"
+                    className="text-xs px-2 py-1.5 rounded-lg focus:outline-none transition-all"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#b0b0b0' }}
                   >
                     <option value="administrador">Administrador</option>
                     <option value="operador">Operador</option>
                   </select>
                   <button
                     onClick={() => handleToggleUser(u.id, u.active)}
-                    className={cn(
-                      'text-xs px-2.5 py-1 rounded-lg font-medium transition',
-                      u.active
-                        ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700'
-                        : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'
-                    )}
+                    className="text-[11px] px-2.5 py-1 rounded-lg font-medium transition-all duration-200"
+                    style={u.active
+                      ? { background: 'rgba(74,222,128,0.1)', color: '#4ade80', border: '1px solid rgba(74,222,128,0.2)' }
+                      : { background: 'rgba(255,255,255,0.04)', color: '#6b6b6b', border: '1px solid rgba(255,255,255,0.08)' }
+                    }
                   >
                     {u.active ? 'Ativo' : 'Inativo'}
                   </button>

@@ -7,32 +7,32 @@ import { AlertCircle, CheckCircle2, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TOM_OPTIONS: Array<{ value: TomDePele; label: string }> = [
-  { value: 'clara', label: 'Clara' },
-  { value: 'media', label: 'Morena' },
+  { value: 'clara',  label: 'Clara' },
+  { value: 'media',  label: 'Morena' },
   { value: 'escura', label: 'Negra' },
 ]
 const BIOTIPO_OPTIONS: Array<{ value: Biotipo; label: string }> = [
-  { value: 'magra', label: 'Esbelto(a)' },
-  { value: 'media', label: 'Médio(a)' },
+  { value: 'magra',     label: 'Esbelto(a)' },
+  { value: 'media',     label: 'Médio(a)' },
   { value: 'plus_size', label: 'Plus size' },
 ]
 const FAIXA_OPTIONS: Array<{ value: FaixaEtaria; label: string }> = [
-  { value: '0_18', label: '0–18 anos' },
-  { value: '18_25', label: '18–25 anos' },
-  { value: '26_35', label: '26–35 anos' },
-  { value: '36_45', label: '36–45 anos' },
+  { value: '0_18',    label: '0–18 anos' },
+  { value: '18_25',   label: '18–25 anos' },
+  { value: '26_35',   label: '26–35 anos' },
+  { value: '36_45',   label: '36–45 anos' },
   { value: '45_mais', label: 'Mais de 45 anos' },
 ]
 const GENERO_OPTIONS: Array<{ value: GeneroModelo; label: string }> = [
-  { value: 'feminino', label: 'Feminino' },
+  { value: 'feminino',  label: 'Feminino' },
   { value: 'masculino', label: 'Masculino' },
-  { value: 'neutro', label: 'Neutro' },
+  { value: 'neutro',    label: 'Neutro' },
 ]
 const TONE_OPTIONS = [
   { value: 'moderno', label: 'Moderno e sofisticado' },
-  { value: 'jovem', label: 'Jovem e descontraído' },
-  { value: 'luxo', label: 'Luxo e exclusividade' },
-  { value: 'casual', label: 'Casual e acessível' },
+  { value: 'jovem',   label: 'Jovem e descontraído' },
+  { value: 'luxo',    label: 'Luxo e exclusividade' },
+  { value: 'casual',  label: 'Casual e acessível' },
 ]
 
 export default function ConfiguracoesPage() {
@@ -42,7 +42,6 @@ export default function ConfiguracoesPage() {
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
-  // Form state
   const [businessName, setBusinessName] = useState('')
   const [businessSegment, setBusinessSegment] = useState('')
   const [businessDescription, setBusinessDescription] = useState('')
@@ -97,15 +96,15 @@ export default function ConfiguracoesPage() {
     const { error } = await supabase
       .from('tenants')
       .update({
-        business_name: businessName || null,
-        business_segment: businessSegment || null,
+        business_name:        businessName || null,
+        business_segment:     businessSegment || null,
         business_description: businessDescription.slice(0, 300) || null,
-        business_tone: businessTone,
-        model_tom_de_pele: tomDePele,
-        model_biotipo: biotipo,
-        model_faixa_etaria: faixaEtaria,
-        model_genero: genero,
-        model_descricao: modelDescricao || null,
+        business_tone:        businessTone,
+        model_tom_de_pele:    tomDePele,
+        model_biotipo:        biotipo,
+        model_faixa_etaria:   faixaEtaria,
+        model_genero:         genero,
+        model_descricao:      modelDescricao || null,
       })
       .eq('id', tenant.id)
 
@@ -120,8 +119,8 @@ export default function ConfiguracoesPage() {
   if (loading) {
     return (
       <div className="p-8">
-        <div className="h-8 w-48 bg-gray-100 rounded-xl shimmer mb-2" />
-        <div className="h-4 w-72 bg-gray-100 rounded-xl shimmer" />
+        <div className="h-8 w-48 rounded-xl shimmer mb-2" />
+        <div className="h-4 w-72 rounded-xl shimmer" />
       </div>
     )
   }
@@ -129,20 +128,17 @@ export default function ConfiguracoesPage() {
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-bella-charcoal">Configurações</h1>
-        <p className="text-gray-500 mt-1">
-          Configure o contexto da sua marca e o perfil padrão do modelo.
-        </p>
+        <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Configurações</h1>
+        <p className="text-bella-gray text-sm mt-1">Configure o contexto da sua marca e o perfil padrão do modelo.</p>
       </div>
 
       {feedback && (
         <div
-          className={cn(
-            'flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-6',
-            feedback.type === 'success'
-              ? 'bg-green-50 text-green-700'
-              : 'bg-red-50 text-red-600'
-          )}
+          className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-6"
+          style={feedback.type === 'success'
+            ? { background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80' }
+            : { background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }
+          }
         >
           {feedback.type === 'success'
             ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
@@ -153,11 +149,9 @@ export default function ConfiguracoesPage() {
       )}
 
       {/* Contexto do negócio */}
-      <section className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="font-semibold text-bella-charcoal mb-1">Contexto da marca</h2>
-        <p className="text-xs text-gray-400 mb-5">
-          Usado para gerar legendas personalizadas. Seja conciso e objetivo.
-        </p>
+      <section className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <h2 className="font-medium text-bella-white mb-1">Contexto da marca</h2>
+        <p className="text-[11px] text-bella-gray mb-5">Usado para gerar legendas personalizadas. Seja conciso e objetivo.</p>
 
         <div className="space-y-4">
           <Field label="Nome da marca">
@@ -196,18 +190,13 @@ export default function ConfiguracoesPage() {
           <Field label="Tom de comunicação">
             <div className="grid grid-cols-2 gap-2">
               {TONE_OPTIONS.map((opt) => (
-                <button
+                <OptionButton
                   key={opt.value}
+                  active={businessTone === opt.value}
                   onClick={() => setBusinessTone(opt.value)}
-                  className={cn(
-                    'px-3 py-2 rounded-xl border text-sm text-left transition',
-                    businessTone === opt.value
-                      ? 'border-bella-rose bg-bella-rose/5 text-bella-rose font-medium'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  )}
                 >
                   {opt.label}
-                </button>
+                </OptionButton>
               ))}
             </div>
           </Field>
@@ -215,9 +204,9 @@ export default function ConfiguracoesPage() {
       </section>
 
       {/* Perfil do modelo */}
-      <section className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
-        <h2 className="font-semibold text-bella-charcoal mb-1">Perfil padrão do modelo</h2>
-        <p className="text-xs text-gray-400 mb-5">
+      <section className="rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <h2 className="font-medium text-bella-white mb-1">Perfil padrão do modelo</h2>
+        <p className="text-[11px] text-bella-gray mb-5">
           Usado quando nenhuma foto de modelo é enviada na geração ou quando não definidos os critérios na página de geração.
         </p>
 
@@ -225,19 +214,15 @@ export default function ConfiguracoesPage() {
           <Field label="Gênero">
             <OptionGroup options={GENERO_OPTIONS} value={genero} onChange={(v) => setGenero(v as GeneroModelo)} />
           </Field>
-
           <Field label="Tom de pele">
             <OptionGroup options={TOM_OPTIONS} value={tomDePele} onChange={(v) => setTomDePele(v as TomDePele)} />
           </Field>
-
           <Field label="Biotipo">
             <OptionGroup options={BIOTIPO_OPTIONS} value={biotipo} onChange={(v) => setBiotipo(v as Biotipo)} />
           </Field>
-
           <Field label="Faixa etária">
             <OptionGroup options={FAIXA_OPTIONS} value={faixaEtaria} onChange={(v) => setFaixaEtaria(v as FaixaEtaria)} />
           </Field>
-
           <Field label="Descrição livre (opcional)">
             <textarea
               value={modelDescricao}
@@ -251,13 +236,9 @@ export default function ConfiguracoesPage() {
         </div>
       </section>
 
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="flex items-center gap-2 bg-bella-rose text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-bella-rose-dark transition disabled:opacity-60"
-      >
+      <button onClick={handleSave} disabled={saving} className="btn-primary">
         <Save className="w-4 h-4" />
-        {saving ? 'Salvando...' : 'Salvar configurações'}
+        <span>{saving ? 'Salvando...' : 'Salvar configurações'}</span>
       </button>
     </div>
   )
@@ -266,17 +247,28 @@ export default function ConfiguracoesPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-2">{label}</label>
       {children}
     </div>
   )
 }
 
-function OptionGroup<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
+function OptionButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-3 py-2 rounded-xl text-sm text-left transition-all duration-200"
+      style={active
+        ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }
+        : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+      }
+    >
+      {children}
+    </button>
+  )
+}
+
+function OptionGroup<T extends string>({ options, value, onChange }: {
   options: Array<{ value: T; label: string }>
   value: T
   onChange: (v: T) => void
@@ -284,18 +276,9 @@ function OptionGroup<T extends string>({
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={cn(
-            'px-3 py-1.5 rounded-xl border text-sm transition',
-            value === opt.value
-              ? 'border-bella-rose bg-bella-rose/5 text-bella-rose font-medium'
-              : 'border-gray-200 text-gray-600 hover:border-gray-300'
-          )}
-        >
+        <OptionButton key={opt.value} active={value === opt.value} onClick={() => onChange(opt.value)}>
           {opt.label}
-        </button>
+        </OptionButton>
       ))}
     </div>
   )

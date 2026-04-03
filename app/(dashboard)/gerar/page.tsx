@@ -6,16 +6,7 @@ import { useRouter } from 'next/navigation'
 import { compressImage } from '@/lib/utils'
 import { BACKGROUND_PRESETS, ASPECT_RATIO_OPTIONS, TAMANHO_OPTIONS, TAMANHO_INFANTIL_ANOS } from '@/lib/types'
 import type { AspectRatio, TamanhoPeca } from '@/lib/types'
-import {
-  Upload,
-  X,
-  Sparkles,
-  Download,
-  CheckCircle2,
-  AlertCircle,
-  ChevronDown,
-  Lock,
-} from 'lucide-react'
+import { Upload, X, Sparkles, Download, CheckCircle2, AlertCircle, ChevronDown, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Step = 'form' | 'generating' | 'result'
@@ -31,7 +22,6 @@ export default function GerarImagemPage() {
   const [step, setStep] = useState<Step>('form')
   const [error, setError] = useState<string | null>(null)
 
-  // Inputs
   const [clothingFile, setClothingFile] = useState<File | null>(null)
   const [clothingPreview, setClothingPreview] = useState<string | null>(null)
   const [modelFile, setModelFile] = useState<File | null>(null)
@@ -44,7 +34,6 @@ export default function GerarImagemPage() {
   const [tamanhoPeca, setTamanhoPeca] = useState<TamanhoPeca | ''>('')
   const [tamanhoInfantil, setTamanhoInfantil] = useState<number>(8)
 
-  // Resultado
   const [result, setResult] = useState<GenerationResult | null>(null)
   const [selectedVariation, setSelectedVariation] = useState<0 | 1>(0)
   const [captionText, setCaptionText] = useState<string | null>(null)
@@ -54,22 +43,13 @@ export default function GerarImagemPage() {
   const clothingInputRef = useRef<HTMLInputElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
 
-  function handleFileSelect(
-    file: File,
-    setFile: (f: File) => void,
-    setPreview: (p: string) => void
-  ) {
+  function handleFileSelect(file: File, setFile: (f: File) => void, setPreview: (p: string) => void) {
     setFile(file)
-    const url = URL.createObjectURL(file)
-    setPreview(url)
+    setPreview(URL.createObjectURL(file))
   }
 
   async function handleGenerate() {
-    if (!clothingFile) {
-      setError('Selecione uma imagem da peça ou acessório.')
-      return
-    }
-
+    if (!clothingFile) { setError('Selecione uma imagem da peça ou acessório.'); return }
     setStep('generating')
     setError(null)
 
@@ -79,18 +59,15 @@ export default function GerarImagemPage() {
       if (modelFile) modelData = await compressImage(modelFile)
 
       const body = {
-        clothingImageBase64: clothing.base64,
+        clothingImageBase64:  clothing.base64,
         clothingImageMimeType: clothing.mimeType,
-        ...(modelData && {
-          modelImageBase64: modelData.base64,
-          modelImageMimeType: modelData.mimeType,
-        }),
-        backgroundPreset: backgroundPreset || undefined,
-        backgroundCustom: backgroundCustom || undefined,
+        ...(modelData && { modelImageBase64: modelData.base64, modelImageMimeType: modelData.mimeType }),
+        backgroundPreset:      backgroundPreset || undefined,
+        backgroundCustom:      backgroundCustom || undefined,
         aspectRatio,
-        tamanhoPeca: tamanhoPeca || undefined,
-        tamanhoInfantil: tamanhoPeca === 'infanto_juvenil' ? tamanhoInfantil : undefined,
-        modelDescricaoLivre: !modelFile && modelDescricaoLivre.trim() ? modelDescricaoLivre.trim() : undefined,
+        tamanhoPeca:           tamanhoPeca || undefined,
+        tamanhoInfantil:       tamanhoPeca === 'infanto_juvenil' ? tamanhoInfantil : undefined,
+        modelDescricaoLivre:   !modelFile && modelDescricaoLivre.trim() ? modelDescricaoLivre.trim() : undefined,
       }
 
       const res = await fetch('/api/images/generate', {
@@ -100,22 +77,13 @@ export default function GerarImagemPage() {
       })
 
       const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Erro ao gerar imagem.'); setStep('form'); return }
 
-      if (!res.ok) {
-        setError(data.error ?? 'Erro ao gerar imagem.')
-        setStep('form')
-        return
-      }
-
-      setResult({
-        imageId: data.imageId,
-        outputUrls: data.outputUrls,
-        selectedUrl: data.outputUrls[0],
-      })
+      setResult({ imageId: data.imageId, outputUrls: data.outputUrls, selectedUrl: data.outputUrls[0] })
       setSelectedVariation(0)
       setStep('result')
-      router.refresh() // atualiza cota na sidebar
-    } catch (err) {
+      router.refresh()
+    } catch {
       setError('Erro inesperado. Tente novamente.')
       setStep('form')
     }
@@ -124,13 +92,11 @@ export default function GerarImagemPage() {
   async function handleSelectVariation(index: 0 | 1) {
     if (!result) return
     setSelectedVariation(index)
-
     await fetch('/api/images/select', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageId: result.imageId, selectedUrl: result.outputUrls[index] }),
     })
-
     setResult((r) => r ? { ...r, selectedUrl: r.outputUrls[index] } : r)
   }
 
@@ -138,38 +104,23 @@ export default function GerarImagemPage() {
     if (!result) return
     setGeneratingCaption(true)
     setCaptionError(null)
-
     const res = await fetch('/api/captions/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageId: result.imageId }),
     })
-
     const data = await res.json()
-
-    if (!res.ok) {
-      setCaptionError(data.error ?? 'Erro ao gerar legenda.')
-    } else {
-      setCaptionText(data.caption ?? null)
-    }
+    if (!res.ok) setCaptionError(data.error ?? 'Erro ao gerar legenda.')
+    else setCaptionText(data.caption ?? null)
     setGeneratingCaption(false)
   }
 
   function handleNewGeneration() {
-    setStep('form')
-    setResult(null)
-    setCaptionText(null)
-    setError(null)
-    setClothingFile(null)
-    setClothingPreview(null)
-    setModelFile(null)
-    setModelPreview(null)
-    setModelDescricaoLivre('')
-    setBackgroundPreset('')
-    setBackgroundCustom('')
-    setAspectRatio('4:5')
-    setTamanhoPeca('')
-    setTamanhoInfantil(8)
+    setStep('form'); setResult(null); setCaptionText(null); setError(null)
+    setClothingFile(null); setClothingPreview(null)
+    setModelFile(null); setModelPreview(null); setModelDescricaoLivre('')
+    setBackgroundPreset(''); setBackgroundCustom('')
+    setAspectRatio('4:5'); setTamanhoPeca(''); setTamanhoInfantil(8)
   }
 
   if (step === 'generating') return <GeneratingState />
@@ -192,113 +143,81 @@ export default function GerarImagemPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-bella-charcoal">Gerar Imagem</h1>
-        <p className="text-gray-500 mt-1">
-          Envie a peça ou acessório e gere uma foto profissional com modelo.
-        </p>
+        <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Gerar Imagem</h1>
+        <p className="text-bella-gray text-sm mt-1">Envie a peça ou acessório e gere uma foto profissional com modelo.</p>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl mb-6">
+        <div
+          className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-6"
+          style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }}
+        >
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Coluna esquerda — inputs de imagem */}
+        {/* Coluna esquerda */}
         <div className="space-y-5">
-          {/* Imagem da peça (obrigatório) */}
           <div>
-            <label className="block text-sm font-medium text-bella-charcoal mb-2">
-              Foto da peça ou acessório
-              <span className="text-bella-rose ml-1">*</span>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-2">
+              Foto da peça ou acessório <span className="text-bella-gold">*</span>
             </label>
-            <input
-              ref={clothingInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) handleFileSelect(f, setClothingFile, setClothingPreview)
-              }}
-            />
-            <ImageUploadBox
-              preview={clothingPreview}
-              placeholder="Clique para enviar a foto da peça"
+            <input ref={clothingInputRef} type="file" accept="image/*" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, setClothingFile, setClothingPreview) }} />
+            <ImageUploadBox preview={clothingPreview} placeholder="Clique para enviar a foto da peça"
               onClick={() => clothingInputRef.current?.click()}
-              onRemove={() => { setClothingFile(null); setClothingPreview(null) }}
-            />
+              onRemove={() => { setClothingFile(null); setClothingPreview(null) }} />
           </div>
 
-          {/* Foto do modelo (opcional) */}
           <div>
-            <label className="block text-sm font-medium text-bella-charcoal mb-1">
-              Foto da pessoa modelo
-              <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-1">
+              Foto da pessoa modelo <span className="text-bella-gray ml-1 normal-case">opcional</span>
             </label>
-            <p className="text-xs text-gray-400 mb-2">
+            <p className="text-[11px] text-bella-gray mb-2">
               Sem foto, o modelo será escolhido pela IA conforme as orientações abaixo.
             </p>
-            <input
-              ref={modelInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) handleFileSelect(f, setModelFile, setModelPreview)
-              }}
-            />
-            <ImageUploadBox
-              preview={modelPreview}
-              placeholder="Clique para enviar a foto do modelo"
+            <input ref={modelInputRef} type="file" accept="image/*" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, setModelFile, setModelPreview) }} />
+            <ImageUploadBox preview={modelPreview} placeholder="Clique para enviar a foto do modelo"
               onClick={() => modelInputRef.current?.click()}
               onRemove={() => { setModelFile(null); setModelPreview(null) }}
-              compact
-            />
+              compact />
           </div>
 
-          {/* Orientação do modelo — só visível quando não há foto de modelo */}
           {!modelFile && (
             <div>
-              <label className="block text-sm font-medium text-bella-charcoal mb-1">
-                Orientação do modelo
-                <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
+              <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-1">
+                Orientação do modelo <span className="text-bella-gray ml-1 normal-case">opcional</span>
               </label>
-              <p className="text-xs text-gray-400 mb-2">
-                Descreva o modelo para esta geração. Se em branco, usa o perfil padrão configurado nas configurações.
+              <p className="text-[11px] text-bella-gray mb-2">
+                Se em branco, usa o perfil padrão configurado nas configurações.
               </p>
               <textarea
                 value={modelDescricaoLivre}
                 onChange={(e) => setModelDescricaoLivre(e.target.value)}
                 placeholder="Ex: mulher jovem, pele clara, cabelos longos, estilo esportivo..."
                 rows={3}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-bella-rose/30 focus:border-bella-rose transition"
+                className="input-field resize-none"
               />
             </div>
           )}
         </div>
 
-        {/* Coluna direita — opções de geração */}
+        {/* Coluna direita */}
         <div className="space-y-5">
           {/* Proporção */}
           <div>
-            <label className="block text-sm font-medium text-bella-charcoal mb-2">
-              Proporção da imagem
-            </label>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-2">Proporção da imagem</label>
             <div className="grid grid-cols-2 gap-2">
               {ASPECT_RATIO_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setAspectRatio(opt.value)}
-                  className={cn(
-                    'px-3 py-2.5 rounded-xl border text-sm text-left transition',
-                    aspectRatio === opt.value
-                      ? 'border-bella-rose bg-bella-rose/5 text-bella-rose font-medium'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  )}
+                <button key={opt.value} onClick={() => setAspectRatio(opt.value)}
+                  className="px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200"
+                  style={aspectRatio === opt.value
+                    ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }
+                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+                  }
                 >
                   {opt.label}
                 </button>
@@ -306,23 +225,19 @@ export default function GerarImagemPage() {
             </div>
           </div>
 
-          {/* Tamanho da peça */}
+          {/* Tamanho */}
           <div>
-            <label className="block text-sm font-medium text-bella-charcoal mb-2">
-              Tamanho da peça
-              <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-2">
+              Tamanho da peça <span className="text-bella-gray ml-1 normal-case">opcional</span>
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
               {TAMANHO_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setTamanhoPeca(tamanhoPeca === opt.value ? '' : opt.value)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-xl border text-sm transition',
-                    tamanhoPeca === opt.value
-                      ? 'border-bella-rose bg-bella-rose/5 text-bella-rose font-medium'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  )}
+                <button key={opt.value} onClick={() => setTamanhoPeca(tamanhoPeca === opt.value ? '' : opt.value)}
+                  className="px-3 py-1.5 rounded-xl text-sm transition-all duration-200"
+                  style={tamanhoPeca === opt.value
+                    ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }
+                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+                  }
                 >
                   {opt.label}
                 </button>
@@ -330,11 +245,9 @@ export default function GerarImagemPage() {
             </div>
             {tamanhoPeca === 'infanto_juvenil' && (
               <div className="mt-2">
-                <label className="block text-xs text-gray-500 mb-1.5">Idade (anos)</label>
-                <select
-                  value={tamanhoInfantil}
-                  onChange={(e) => setTamanhoInfantil(Number(e.target.value))}
-                  className="px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-bella-rose/30 focus:border-bella-rose transition"
+                <label className="block text-[11px] text-bella-gray mb-1.5">Idade (anos)</label>
+                <select value={tamanhoInfantil} onChange={(e) => setTamanhoInfantil(Number(e.target.value))}
+                  className="input-field w-auto"
                 >
                   {TAMANHO_INFANTIL_ANOS.map((ano) => (
                     <option key={ano} value={ano}>{ano === 0 ? 'RN (Recém-nascido)' : `${ano} anos`}</option>
@@ -344,42 +257,43 @@ export default function GerarImagemPage() {
             )}
           </div>
 
-          {/* Fundo / Paisagem */}
+          {/* Fundo */}
           <div>
-            <label className="block text-sm font-medium text-bella-charcoal mb-1">
-              Paisagem / Fundo
-              <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
+            <label className="block text-xs text-bella-gray-light tracking-wide uppercase mb-1">
+              Paisagem / Fundo <span className="text-bella-gray ml-1 normal-case">opcional</span>
             </label>
-
-            {/* Opções pré-definidas */}
             <div className="relative mb-2">
               <button
                 onClick={() => setShowBgOptions(!showBgOptions)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-left text-gray-600 flex items-center justify-between hover:border-gray-300 transition"
+                className="w-full px-4 py-2.5 rounded-xl text-sm text-left flex items-center justify-between transition-all duration-200"
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }}
               >
                 <span>
                   {backgroundPreset
                     ? BACKGROUND_PRESETS.find((b) => b.value === backgroundPreset)?.label ?? 'Selecionar fundo'
                     : 'Selecionar fundo pré-definido'}
                 </span>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
+                <ChevronDown className="w-4 h-4 text-bella-gray flex-shrink-0" />
               </button>
               {showBgOptions && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                  <button
-                    onClick={() => { setBackgroundPreset(''); setShowBgOptions(false) }}
-                    className="w-full px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-50 text-left"
+                <div className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden shadow-xl"
+                  style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  <button onClick={() => { setBackgroundPreset(''); setShowBgOptions(false) }}
+                    className="w-full px-4 py-2.5 text-sm text-bella-gray text-left transition-colors"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   >
                     Nenhum (deixar IA escolher)
                   </button>
                   {BACKGROUND_PRESETS.map((bg) => (
-                    <button
-                      key={bg.value}
+                    <button key={bg.value}
                       onClick={() => { setBackgroundPreset(bg.value); setShowBgOptions(false) }}
-                      className={cn(
-                        'w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition',
-                        backgroundPreset === bg.value ? 'text-bella-rose font-medium' : 'text-gray-700'
-                      )}
+                      className="w-full px-4 py-2.5 text-sm text-left transition-colors"
+                      style={{ color: backgroundPreset === bg.value ? '#c9a96e' : '#6b6b6b' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                     >
                       {bg.label}
                     </button>
@@ -387,76 +301,51 @@ export default function GerarImagemPage() {
                 </div>
               )}
             </div>
-
-            {/* Descrição livre */}
             <textarea
               value={backgroundCustom}
               onChange={(e) => setBackgroundCustom(e.target.value)}
               placeholder="Ou descreva o fundo livremente... (ex: 'terraço com flores brancas e luz do pôr do sol')"
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-bella-rose/30 focus:border-bella-rose transition"
+              className="input-field resize-none"
             />
           </div>
         </div>
       </div>
 
-      {/* Botão gerar */}
       <div className="mt-8">
-        <button
-          onClick={handleGenerate}
-          disabled={!clothingFile}
-          className="flex items-center gap-2 bg-bella-rose text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-bella-rose-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button onClick={handleGenerate} disabled={!clothingFile} className="btn-primary">
           <Sparkles className="w-4 h-4" />
-          Gerar 2 variações
+          <span>Gerar 2 variações</span>
         </button>
-        <p className="text-xs text-gray-400 mt-2">
-          Cada geração usa 1 crédito da sua cota mensal.
-        </p>
+        <p className="text-[11px] text-bella-gray mt-2">Cada geração usa 1 crédito da sua cota mensal.</p>
       </div>
     </div>
   )
 }
 
-// ──────────────────────────────────────────────────────────────
-// Sub-componentes
-// ──────────────────────────────────────────────────────────────
-
-function ImageUploadBox({
-  preview,
-  placeholder,
-  onClick,
-  onRemove,
-  compact = false,
-}: {
-  preview: string | null
-  placeholder: string
-  onClick: () => void
-  onRemove: () => void
-  compact?: boolean
+function ImageUploadBox({ preview, placeholder, onClick, onRemove, compact = false }: {
+  preview: string | null; placeholder: string; onClick: () => void; onRemove: () => void; compact?: boolean
 }) {
   return (
     <div
-      className={cn(
-        'relative rounded-xl border-2 border-dashed border-gray-200 bg-white overflow-hidden group transition hover:border-bella-rose/50',
-        compact ? 'h-32' : 'h-56'
-      )}
+      className={cn('relative rounded-xl overflow-hidden group transition-all duration-200 cursor-pointer', compact ? 'h-32' : 'h-56')}
+      style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.1)' }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(201,169,110,0.3)')}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = preview ? 'rgba(201,169,110,0.2)' : 'rgba(255,255,255,0.1)')}
     >
       {preview ? (
         <>
           <Image src={preview} alt="Preview" fill className="object-contain p-2" />
           <button
             onClick={(e) => { e.stopPropagation(); onRemove() }}
-            className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm hover:bg-red-50 transition z-10"
+            className="absolute top-2 right-2 p-1 rounded-full z-10 transition-colors"
+            style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.1)' }}
           >
-            <X className="w-4 h-4 text-gray-500" />
+            <X className="w-4 h-4 text-bella-gray-light" />
           </button>
         </>
       ) : (
-        <button
-          onClick={onClick}
-          className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-bella-rose transition"
-        >
+        <button onClick={onClick} className="w-full h-full flex flex-col items-center justify-center gap-2 text-bella-gray hover:text-bella-gold transition-colors">
           <Upload className="w-6 h-6" />
           <span className="text-xs text-center px-4">{placeholder}</span>
         </button>
@@ -469,20 +358,20 @@ function GeneratingState() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-bella-rose/10 flex items-center justify-center mb-6 animate-pulse">
-          <Sparkles className="w-8 h-8 text-bella-rose" />
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 animate-pulse"
+          style={{ background: 'rgba(201,169,110,0.1)' }}
+        >
+          <Sparkles className="w-8 h-8 text-bella-gold" />
         </div>
-        <h2 className="text-xl font-semibold text-bella-charcoal mb-2">Gerando suas imagens...</h2>
-        <p className="text-gray-500 text-sm max-w-sm">
+        <h2 className="text-xl font-display font-medium text-bella-white mb-2">Gerando suas imagens...</h2>
+        <p className="text-bella-gray text-sm max-w-sm">
           A IA está criando 2 variações com a sua peça. Isso pode levar até 30 segundos.
         </p>
         <div className="mt-8 flex gap-1.5">
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full bg-bella-rose animate-bounce"
-              style={{ animationDelay: `${i * 150}ms` }}
-            />
+            <div key={i} className="w-2 h-2 rounded-full bg-bella-gold animate-bounce"
+              style={{ animationDelay: `${i * 150}ms` }} />
           ))}
         </div>
       </div>
@@ -490,120 +379,88 @@ function GeneratingState() {
   )
 }
 
-function ResultState({
-  result,
-  selectedVariation,
-  onSelectVariation,
-  captionText,
-  captionError,
-  generatingCaption,
-  onGenerateCaption,
-  onNewGeneration,
-}: {
-  result: GenerationResult
-  selectedVariation: 0 | 1
-  onSelectVariation: (i: 0 | 1) => void
-  captionText: string | null
-  captionError: string | null
-  generatingCaption: boolean
-  onGenerateCaption: () => void
-  onNewGeneration: () => void
+function ResultState({ result, selectedVariation, onSelectVariation, captionText, captionError, generatingCaption, onGenerateCaption, onNewGeneration }: {
+  result: GenerationResult; selectedVariation: 0 | 1; onSelectVariation: (i: 0 | 1) => void
+  captionText: string | null; captionError: string | null; generatingCaption: boolean
+  onGenerateCaption: () => void; onNewGeneration: () => void
 }) {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <h1 className="text-xl font-bold text-bella-charcoal">Imagens geradas!</h1>
+            <CheckCircle2 className="w-5 h-5 text-green-400" />
+            <h1 className="text-xl font-display font-medium text-bella-white">Imagens geradas!</h1>
           </div>
-          <p className="text-gray-500 text-sm">Selecione a variação que preferir.</p>
+          <p className="text-bella-gray text-sm">Selecione a variação que preferir.</p>
         </div>
-        <button
-          onClick={onNewGeneration}
-          className="text-sm text-bella-rose hover:underline"
-        >
+        <button onClick={onNewGeneration} className="text-sm text-bella-gold hover:text-bella-gold-light transition-colors">
           Nova geração
         </button>
       </div>
 
-      {/* 2 variações */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         {result.outputUrls.map((url, i) => (
-          <div
-            key={i}
-            onClick={() => onSelectVariation(i as 0 | 1)}
-            className={cn(
-              'relative rounded-2xl overflow-hidden cursor-pointer border-2 transition',
-              selectedVariation === i
-                ? 'border-bella-rose shadow-lg shadow-bella-rose/20'
-                : 'border-transparent hover:border-gray-300'
-            )}
+          <div key={i} onClick={() => onSelectVariation(i as 0 | 1)}
+            className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300"
+            style={selectedVariation === i
+              ? { border: '2px solid #c9a96e', boxShadow: '0 8px 32px rgba(201,169,110,0.2)' }
+              : { border: '2px solid rgba(255,255,255,0.06)' }
+            }
           >
-            <div className="aspect-[4/5] relative bg-gray-100">
+            <div className="aspect-[4/5] relative" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <Image src={url} alt={`Variação ${i + 1}`} fill className="object-cover" />
             </div>
             <div className="absolute top-3 left-3">
-              <span
-                className={cn(
-                  'text-xs px-2.5 py-1 rounded-full font-medium',
-                  selectedVariation === i
-                    ? 'bg-bella-rose text-white'
-                    : 'bg-white/80 text-gray-700'
-                )}
+              <span className="text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide"
+                style={selectedVariation === i
+                  ? { background: 'linear-gradient(135deg, #c9a96e, #dfc9a0)', color: '#0a0a0a' }
+                  : { background: 'rgba(0,0,0,0.6)', color: '#b0b0b0' }
+                }
               >
                 Variação {i + 1}
               </span>
             </div>
             {selectedVariation === i && (
               <div className="absolute top-3 right-3">
-                <CheckCircle2 className="w-5 h-5 text-bella-rose drop-shadow" />
+                <CheckCircle2 className="w-5 h-5 text-bella-gold drop-shadow" />
               </div>
             )}
           </div>
         ))}
       </div>
 
-      {/* Ações */}
       <div className="flex flex-wrap gap-3 mb-8">
-        <a
-          href={result.outputUrls[selectedVariation]}
-          download={`bella-imagem-variacao-${selectedVariation + 1}.jpg`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 bg-bella-charcoal text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition"
+        <a href={result.outputUrls[selectedVariation]} download={`bella-imagem-v${selectedVariation + 1}.jpg`}
+          target="_blank" rel="noopener noreferrer" className="btn-primary"
         >
           <Download className="w-4 h-4" />
-          Baixar variação {selectedVariation + 1}
+          <span>Baixar variação {selectedVariation + 1}</span>
         </a>
 
         {!captionText && !captionError && (
-          <button
-            onClick={onGenerateCaption}
-            disabled={generatingCaption}
-            className="flex items-center gap-2 border border-bella-rose text-bella-rose px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-bella-rose/5 transition disabled:opacity-60"
-          >
+          <button onClick={onGenerateCaption} disabled={generatingCaption} className="btn-outline">
             <Sparkles className="w-4 h-4" />
             {generatingCaption ? 'Gerando legenda...' : 'Gerar legenda'}
           </button>
         )}
 
         {captionError && (
-          <div className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+          <div className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-full"
+            style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}
+          >
             <Lock className="w-4 h-4 flex-shrink-0" />
             {captionError}
           </div>
         )}
       </div>
 
-      {/* Legenda gerada */}
       {captionText && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h3 className="font-semibold text-bella-charcoal mb-3">Legenda gerada</h3>
-          <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{captionText}</p>
-          <button
-            onClick={() => navigator.clipboard.writeText(captionText)}
-            className="mt-4 text-xs text-bella-rose hover:underline"
+        <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <h3 className="font-medium text-bella-white mb-3">Legenda gerada</h3>
+          <p className="text-sm text-bella-gray-light whitespace-pre-line leading-relaxed">{captionText}</p>
+          <button onClick={() => navigator.clipboard.writeText(captionText)}
+            className="mt-4 text-xs text-bella-gold hover:text-bella-gold-light transition-colors"
           >
             Copiar legenda
           </button>

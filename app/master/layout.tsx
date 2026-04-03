@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
@@ -17,28 +19,35 @@ export default async function MasterLayout({ children }: { children: React.React
 
   if (profile?.role !== 'master') redirect('/dashboard')
 
+  const NAV = [
+    { href: '/master',            label: 'Visão geral', icon: Home },
+    { href: '/master/tenants',    label: 'Empresas',    icon: Building2 },
+    { href: '/master/relatorios', label: 'Relatórios',  icon: BarChart2 },
+  ]
+
   return (
-    <div className="flex min-h-screen bg-bella-cream">
-      {/* Sidebar master */}
-      <aside className="w-56 bg-bella-charcoal text-white flex-shrink-0 flex flex-col min-h-screen">
-        <div className="px-5 py-5 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-bella-rose-light" />
-            <span className="font-bold text-sm tracking-tight">Painel Master</span>
+    <div className="flex min-h-screen bg-bella-black">
+      <aside
+        className="w-56 flex-shrink-0 flex flex-col min-h-screen"
+        style={{ background: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-bella-gold flex-shrink-0" />
+            <span className="font-display font-semibold text-sm text-bella-white tracking-tight">
+              Painel Master
+            </span>
           </div>
-          <p className="text-xs text-white/40 mt-0.5 ml-7">Bella Imagem</p>
+          <p className="text-[10px] text-bella-gray mt-0.5 ml-[26px]">Bella Imagem</p>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {[
-            { href: '/master', label: 'Visão geral', icon: Home },
-            { href: '/master/tenants', label: 'Empresas', icon: Building2 },
-            { href: '/master/relatorios', label: 'Relatórios', icon: BarChart2 },
-          ].map(({ href, label, icon: Icon }) => (
+          {NAV.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/10 hover:text-white transition"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-bella-gray hover:text-bella-white transition-colors duration-200"
+              style={{ border: '1px solid transparent' }}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               {label}
@@ -46,8 +55,8 @@ export default async function MasterLayout({ children }: { children: React.React
           ))}
         </nav>
 
-        <div className="px-5 py-4 border-t border-white/10">
-          <Link href="/dashboard" className="text-xs text-white/40 hover:text-white transition">
+        <div className="px-5 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <Link href="/dashboard" className="text-[11px] text-bella-gray hover:text-bella-gold transition-colors">
             Voltar ao dashboard
           </Link>
         </div>

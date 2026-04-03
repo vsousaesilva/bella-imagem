@@ -25,8 +25,8 @@ export default async function DashboardPage() {
   if (!profile?.tenant_id) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-bold text-bella-charcoal">Bem-vindo(a)!</h1>
-        <p className="text-gray-500 mt-2">Aguarde a configuração do seu acesso pelo administrador.</p>
+        <h1 className="text-2xl font-display font-medium text-bella-white">Bem-vindo(a)!</h1>
+        <p className="text-bella-gray mt-2">Aguarde a configuração do seu acesso pelo administrador.</p>
       </div>
     )
   }
@@ -34,7 +34,6 @@ export default async function DashboardPage() {
   const tenant = profile.tenant as Tenant
   const isMaster = profile.role === 'master'
 
-  // Últimas imagens geradas
   const { data: recentImages } = await admin
     .from('generated_images')
     .select('*')
@@ -43,7 +42,6 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
     .limit(6)
 
-  // Estatísticas do mês
   const periodStart = new Date()
   periodStart.setDate(1)
   periodStart.setHours(0, 0, 0, 0)
@@ -66,82 +64,64 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-bella-charcoal">
+        <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">
           Olá, {profile.full_name?.split(' ')[0] ?? 'Bem-vindo(a)'}!
         </h1>
-        <p className="text-gray-500 mt-1">Aqui está um resumo do seu uso este mês.</p>
+        <p className="text-bella-gray mt-1 text-sm">Aqui está um resumo do seu uso este mês.</p>
       </div>
 
-      {/* Stats cards */}
+      {/* Stats */}
       <div className={cn(
         'grid gap-4 mb-8',
         isMaster ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'
       )}>
-        <StatCard
-          icon={<ImageIcon className="w-5 h-5 text-bella-rose" />}
-          label="Imagens geradas"
-          value={imagesThisMonth.toString()}
-          sub="este mês"
-        />
-        <StatCard
-          icon={<Sparkles className="w-5 h-5 text-purple-500" />}
-          label="Legendas geradas"
-          value={captionsThisMonth.toString()}
-          sub="este mês"
-        />
-        <StatCard
-          icon={<Clock className="w-5 h-5 text-amber-500" />}
-          label="Tempo médio"
-          value={avgTimeMs > 0 ? `${(avgTimeMs / 1000).toFixed(1)}s` : '—'}
-          sub="por geração"
-        />
+        <StatCard icon={<ImageIcon className="w-4 h-4 text-bella-gold" />}  label="Imagens geradas"  value={imagesThisMonth.toString()}  sub="este mês" />
+        <StatCard icon={<Sparkles   className="w-4 h-4 text-bella-rose" />} label="Legendas geradas" value={captionsThisMonth.toString()} sub="este mês" />
+        <StatCard icon={<Clock      className="w-4 h-4 text-amber-400" />}  label="Tempo médio"      value={avgTimeMs > 0 ? `${(avgTimeMs / 1000).toFixed(1)}s` : '—'} sub="por geração" />
         {isMaster && (
-          <StatCard
-            icon={<TrendingUp className="w-5 h-5 text-green-500" />}
-            label="Custo total"
-            value={formatCostBrl(totalCostUsd)}
-            sub="este mês"
-          />
+          <StatCard icon={<TrendingUp className="w-4 h-4 text-green-400" />} label="Custo total" value={formatCostBrl(totalCostUsd)} sub="este mês" />
         )}
       </div>
 
       {/* Cota */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
+      <div className="rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="font-semibold text-bella-charcoal">Cota de imagens</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h2 className="font-medium text-bella-white">Cota de imagens</h2>
+            <p className="text-sm text-bella-gray mt-0.5">
               {tenant.quota_used} de {tenant.quota_limit} imagens utilizadas
             </p>
           </div>
-          <span className={cn('text-xs px-2.5 py-1 rounded-full font-medium', PLAN_COLORS[tenant.plan])}>
+          <span className={cn('text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide', PLAN_COLORS[tenant.plan])}>
             Plano {PLAN_LABELS[tenant.plan]}
           </span>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <div
-            className={cn(
-              'h-full rounded-full transition-all',
-              percent >= 90 ? 'bg-red-400' : percent >= 70 ? 'bg-amber-400' : 'bg-bella-rose'
-            )}
-            style={{ width: `${percent}%` }}
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${percent}%`,
+              background: percent >= 90 ? '#f87171' : percent >= 70 ? '#fbbf24' : 'linear-gradient(90deg, #c9a96e, #dfc9a0)',
+            }}
           />
         </div>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-[11px] text-bella-gray mt-2">
           Cota renova em {formatDate(tenant.quota_reset_at)}
         </p>
       </div>
 
       {/* Últimas imagens */}
       <div>
-        <h2 className="font-semibold text-bella-charcoal mb-4">Últimas imagens geradas</h2>
+        <h2 className="font-medium text-bella-white mb-4">Últimas imagens geradas</h2>
         {!recentImages?.length ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-            <ImageIcon className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm">Nenhuma imagem gerada ainda.</p>
-            <a href="/gerar" className="inline-block mt-4 text-sm text-bella-rose hover:underline">
+          <div
+            className="rounded-2xl p-12 text-center"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+          >
+            <ImageIcon className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.1)' }} />
+            <p className="text-bella-gray text-sm">Nenhuma imagem gerada ainda.</p>
+            <a href="/gerar" className="inline-block mt-4 text-sm text-bella-gold hover:text-bella-gold-light transition-colors">
               Gerar primeira imagem
             </a>
           </div>
@@ -153,14 +133,15 @@ export default async function DashboardPage() {
                 <a
                   key={img.id}
                   href="/galeria"
-                  className="aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 block group relative"
+                  className="aspect-[4/5] rounded-xl overflow-hidden block group relative"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
                   {url && (
                     <Image
                       src={url}
                       alt="Imagem gerada"
                       fill
-                      className="object-cover group-hover:scale-105 transition"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                       unoptimized
                     />
                   )}
@@ -174,25 +155,20 @@ export default async function DashboardPage() {
   )
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  sub: string
+function StatCard({ icon, label, value, sub }: {
+  icon: React.ReactNode; label: string; value: string; sub: string
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div
+      className="rounded-2xl p-5 transition-all duration-300"
+      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+    >
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <span className="text-sm text-gray-500">{label}</span>
+        <span className="text-sm text-bella-gray">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-bella-charcoal">{value}</p>
-      <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+      <p className="text-2xl font-display font-medium text-bella-white">{value}</p>
+      <p className="text-[11px] text-bella-gray mt-0.5">{sub}</p>
     </div>
   )
 }

@@ -16,7 +16,6 @@ export default async function TenantsPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Busca stats por tenant (imagens + custo)
   const { data: stats } = await admin
     .from('usage_logs')
     .select('tenant_id, action, cost_usd')
@@ -32,74 +31,71 @@ export default async function TenantsPage() {
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-bella-charcoal">Empresas</h1>
-        <p className="text-gray-500 mt-1">{tenants?.length ?? 0} empresas cadastradas.</p>
+        <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Empresas</h1>
+        <p className="text-bella-gray text-sm mt-1">{tenants?.length ?? 0} empresas cadastradas.</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
+            <tr className="text-[10px] text-bella-gray tracking-widest uppercase" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
               <th className="text-left px-5 py-3">Empresa</th>
               <th className="text-left px-4 py-3">Plano</th>
               <th className="text-center px-4 py-3">Cota</th>
               <th className="text-right px-4 py-3">Imagens</th>
-              <th className="text-right px-4 py-3">Custo (USD)</th>
+              <th className="text-right px-4 py-3">Custo</th>
               <th className="text-right px-4 py-3">Status</th>
               <th className="text-right px-5 py-3">Criada em</th>
             </tr>
           </thead>
           <tbody>
             {tenantStats.map((t) => (
-              <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition">
+              <tr key={t.id} className="transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-bella-nude flex items-center justify-center flex-shrink-0">
-                      <Building2 className="w-3.5 h-3.5 text-bella-rose" />
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(201,169,110,0.1)' }}>
+                      <Building2 className="w-3.5 h-3.5 text-bella-gold" />
                     </div>
                     <div>
-                      <Link href={`/master/tenants/${t.id}`} className="font-medium text-bella-charcoal hover:text-bella-rose transition">
+                      <Link href={`/master/tenants/${t.id}`} className="font-medium text-bella-white hover:text-bella-gold transition-colors">
                         {t.name}
                       </Link>
-                      <p className="text-xs text-gray-400">{t.slug}</p>
+                      <p className="text-[10px] text-bella-gray">{t.slug}</p>
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', PLAN_COLORS[t.plan])}>
+                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[t.plan])}>
                     {PLAN_LABELS[t.plan]}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="text-xs text-gray-600">
-                    {t.quota_used}/{t.quota_limit}
-                  </span>
+                  <span className="text-xs text-bella-gray">{t.quota_used}/{t.quota_limit}</span>
                 </td>
-                <td className="px-4 py-3 text-right text-bella-charcoal font-medium">
-                  {t.imagesTotal}
-                </td>
-                <td className="px-4 py-3 text-right text-gray-600">
-                  {formatCostBrl(t.costTotal)}
-                </td>
+                <td className="px-4 py-3 text-right text-bella-white font-medium">{t.imagesTotal}</td>
+                <td className="px-4 py-3 text-right text-bella-gray text-xs">{formatCostBrl(t.costTotal)}</td>
                 <td className="px-4 py-3 text-right">
-                  <span className={cn(
-                    'text-xs px-2 py-0.5 rounded-full font-medium',
-                    t.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                  )}>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                    style={t.active
+                      ? { background: 'rgba(74,222,128,0.1)', color: '#4ade80' }
+                      : { background: 'rgba(255,255,255,0.06)', color: '#6b6b6b' }
+                    }
+                  >
                     {t.active ? 'Ativa' : 'Inativa'}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-right text-xs text-gray-400">
-                  {formatDate(t.created_at)}
-                </td>
+                <td className="px-5 py-3 text-right text-[11px] text-bella-gray">{formatDate(t.created_at)}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
         {!tenants?.length && (
-          <div className="py-16 text-center text-gray-400">
-            <Building2 className="w-8 h-8 mx-auto mb-3 text-gray-200" />
+          <div className="py-16 text-center text-bella-gray">
+            <Building2 className="w-8 h-8 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.1)' }} />
             Nenhuma empresa cadastrada ainda.
           </div>
         )}

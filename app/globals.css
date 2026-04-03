@@ -3,57 +3,107 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 30 30% 98%;
-    --foreground: 0 0% 18%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 18%;
-    --primary: 326 84% 51%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 30 40% 94%;
-    --secondary-foreground: 0 0% 18%;
-    --muted: 30 20% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 326 84% 95%;
-    --accent-foreground: 326 84% 40%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 326 84% 51%;
-    --radius: 0.75rem;
-  }
-}
+  * { box-sizing: border-box; }
 
-@layer base {
-  * { @apply border-border; }
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: var(--font-body), system-ui, sans-serif;
+    background: #0a0a0a;
+    color: #fefefe;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scrollbar gold */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #c9a96e; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #dfc9a0; }
+}
+
+@layer components {
+  /* ── Botão primário (gradiente gold) ── */
+  .btn-primary {
+    @apply relative overflow-hidden inline-flex items-center justify-center gap-2
+           px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide
+           text-bella-black transition-all duration-300;
+    background: linear-gradient(135deg, #c9a96e 0%, #dfc9a0 100%);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #dfc9a0 0%, #f5e6c8 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,169,110,0.3); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-primary > * { position: relative; z-index: 1; }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  /* ── Botão outline ── */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2
+           px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide
+           text-bella-gold transition-all duration-300;
+    border: 1px solid rgba(201,169,110,0.4);
+  }
+  .btn-outline:hover {
+    background: rgba(201,169,110,0.08);
+    border-color: #c9a96e;
+    transform: translateY(-2px);
+  }
+
+  /* ── Card glassmorphism escuro ── */
+  .card-dark {
+    @apply rounded-2xl p-6 transition-all duration-300;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .card-dark:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(201,169,110,0.15);
+  }
+
+  /* ── Input escuro ── */
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl text-sm text-bella-white
+           placeholder:text-bella-gray
+           focus:outline-none focus:ring-1
+           transition-all duration-200;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .input-field:focus {
+    border-color: rgba(201,169,110,0.4);
+    box-shadow: 0 0 0 2px rgba(201,169,110,0.1);
+  }
+
+  /* ── Shimmer skeleton ── */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.04) 25%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* ── Texto brilhante dourado ── */
+  .shimmer-text {
+    background: linear-gradient(90deg, #c9a96e 0%, #f5e6c8 25%, #c9a96e 50%, #f5e6c8 75%, #c9a96e 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+
+  /* ── Divider gold ── */
+  .divider-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(201,169,110,0.2) 50%, transparent 100%);
   }
 }
-
-/* Shimmer skeleton */
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--muted)) 25%,
-    hsl(var(--secondary)) 50%,
-    hsl(var(--muted)) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Campo de formulário padrão */
-.input-field {
-  @apply w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700
-    placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-bella-rose/30
-    focus:border-bella-rose transition;
-}
-
-/* Scrollbar discreta */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }

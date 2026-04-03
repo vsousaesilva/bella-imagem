@@ -21,9 +21,9 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Painel', icon: LayoutGrid },
-  { href: '/gerar', label: 'Gerar Imagem', icon: Sparkles },
-  { href: '/galeria', label: 'Galeria', icon: ImageIcon },
+  { href: '/dashboard', label: 'Painel',         icon: LayoutGrid },
+  { href: '/gerar',     label: 'Gerar Imagem',   icon: Sparkles },
+  { href: '/galeria',   label: 'Galeria',         icon: ImageIcon },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
@@ -42,17 +42,25 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
     : 0
 
   return (
-    <aside className="w-60 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col min-h-screen">
+    <aside
+      className="w-60 flex-shrink-0 flex flex-col min-h-screen"
+      style={{ background: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+    >
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-bella-rose flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #c9a96e, #dfc9a0)' }}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-bella-black" />
           </div>
-          <span className="font-bold text-bella-charcoal tracking-tight">Bella Imagem</span>
+          <span className="font-display font-semibold text-bella-white tracking-tight text-sm">
+            Bella Imagem
+          </span>
         </div>
         {tenant && (
-          <p className="text-xs text-gray-400 mt-1 truncate pl-9">{tenant.name}</p>
+          <p className="text-[11px] text-bella-gray mt-1 truncate pl-[37px]">{tenant.name}</p>
         )}
       </div>
 
@@ -65,11 +73,15 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
               key={href}
               href={href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition',
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
                 active
-                  ? 'bg-bella-rose/10 text-bella-rose font-medium'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-bella-charcoal'
+                  ? 'text-bella-gold font-medium'
+                  : 'text-bella-gray hover:text-bella-white'
               )}
+              style={active
+                ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.15)' }
+                : { border: '1px solid transparent' }
+              }
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               {label}
@@ -77,16 +89,19 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
           )
         })}
 
-        {/* Link master apenas para role master */}
         {profile.role === 'master' && (
           <Link
             href="/master"
             className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition',
+              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
               pathname.startsWith('/master')
-                ? 'bg-bella-rose/10 text-bella-rose font-medium'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-bella-charcoal'
+                ? 'text-bella-gold font-medium'
+                : 'text-bella-gray hover:text-bella-white'
             )}
+            style={pathname.startsWith('/master')
+              ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.15)' }
+              : { border: '1px solid transparent' }
+            }
           >
             <ShieldCheck className="w-4 h-4 flex-shrink-0" />
             Painel Master
@@ -96,29 +111,28 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
 
       {/* Cota */}
       {tenant && (
-        <div className="px-5 py-4 border-t border-gray-100">
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+        <div className="px-5 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center justify-between text-xs text-bella-gray mb-2">
             <span>Imagens este mês</span>
-            <span className="font-medium text-bella-charcoal">
+            <span className="font-medium text-bella-white">
               {tenant.quota_used}/{tenant.quota_limit}
             </span>
           </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
             <div
-              className={cn(
-                'h-full rounded-full transition-all',
-                quotaPercent >= 90 ? 'bg-red-400' : quotaPercent >= 70 ? 'bg-amber-400' : 'bg-bella-rose'
-              )}
-              style={{ width: `${quotaPercent}%` }}
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${quotaPercent}%`,
+                background: quotaPercent >= 90
+                  ? '#f87171'
+                  : quotaPercent >= 70
+                    ? '#fbbf24'
+                    : 'linear-gradient(90deg, #c9a96e, #dfc9a0)',
+              }}
             />
           </div>
           <div className="mt-2">
-            <span
-              className={cn(
-                'inline-block text-xs px-2 py-0.5 rounded-full font-medium',
-                PLAN_COLORS[tenant.plan]
-              )}
-            >
+            <span className={cn('inline-block text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[tenant.plan])}>
               {PLAN_LABELS[tenant.plan]}
             </span>
           </div>
@@ -126,22 +140,23 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
       )}
 
       {/* User + Logout */}
-      <div className="px-4 py-4 border-t border-gray-100">
+      <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-bella-nude-dark flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-semibold text-bella-charcoal">
-              {(profile.full_name ?? 'U')[0].toUpperCase()}
-            </span>
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-semibold text-bella-gold"
+            style={{ background: 'rgba(201,169,110,0.12)' }}
+          >
+            {(profile.full_name ?? 'U')[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-bella-charcoal truncate">
+            <p className="text-xs font-medium text-bella-white truncate">
               {profile.full_name ?? 'Usuário'}
             </p>
-            <p className="text-xs text-gray-400 capitalize">{profile.role}</p>
+            <p className="text-[10px] text-bella-gray capitalize">{profile.role}</p>
           </div>
           <button
             onClick={handleLogout}
-            className="text-gray-400 hover:text-red-500 transition"
+            className="text-bella-gray hover:text-red-400 transition-colors"
             title="Sair"
           >
             <LogOut className="w-4 h-4" />
