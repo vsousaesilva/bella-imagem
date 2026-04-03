@@ -44,14 +44,27 @@ export async function compressImage(
   })
 }
 
-/** Formata custo em USD para exibição */
-export function formatCostUsd(usd: number): string {
-  if (usd === 0) return 'R$ 0,00'
+/** Taxa de conversão USD → BRL (atualizar conforme necessário) */
+const USD_TO_BRL = 5.75
+
+/** Converte USD para BRL */
+export function usdToBrl(usd: number): number {
+  return usd * USD_TO_BRL
+}
+
+/** Formata valor em BRL */
+export function formatCostBrl(usd: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 4,
-  }).format(usd)
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  }).format(usdToBrl(usd))
+}
+
+/** @deprecated use formatCostBrl */
+export function formatCostUsd(usd: number): string {
+  return formatCostBrl(usd)
 }
 
 /** Formata duração em ms para segundos legíveis */

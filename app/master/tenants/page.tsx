@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import { createAdminClient } from '@/lib/supabase/server'
-import { formatDate, formatCostUsd } from '@/lib/utils'
+import { formatDate, formatCostBrl } from '@/lib/utils'
+import Link from 'next/link'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { Tenant } from '@/lib/types'
@@ -57,7 +58,9 @@ export default async function TenantsPage() {
                       <Building2 className="w-3.5 h-3.5 text-bella-rose" />
                     </div>
                     <div>
-                      <p className="font-medium text-bella-charcoal">{t.name}</p>
+                      <Link href={`/master/tenants/${t.id}`} className="font-medium text-bella-charcoal hover:text-bella-rose transition">
+                        {t.name}
+                      </Link>
                       <p className="text-xs text-gray-400">{t.slug}</p>
                     </div>
                   </div>
@@ -76,7 +79,7 @@ export default async function TenantsPage() {
                   {t.imagesTotal}
                 </td>
                 <td className="px-4 py-3 text-right text-gray-600">
-                  {formatCostUsd(t.costTotal)}
+                  {formatCostBrl(t.costTotal)}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <span className={cn(

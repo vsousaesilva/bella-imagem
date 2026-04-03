@@ -119,10 +119,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
   }
 
-  const { tenantId, plan, active } = await request.json()
+  const { tenantId, plan, active, name } = await request.json()
   if (!tenantId) return NextResponse.json({ error: 'tenantId obrigatório' }, { status: 400 })
 
   const updates: Record<string, unknown> = {}
+
+  if (name) updates.name = name
 
   if (plan) {
     const quotaMap: Record<PlanType, number> = {

@@ -20,15 +20,23 @@ export default async function GaleriaPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile?.tenant_id) redirect('/dashboard')
+  // Master sem tenant ativo redireciona para o painel master
+  if (!profile?.tenant_id) {
+    if (profile?.role === 'master') redirect('/master')
+    redirect('/dashboard')
+  }
 
-  const { data: images } = await admin
+  const { data: images, error } = await admin
     .from('generated_images')
     .select('*')
     .eq('tenant_id', profile.tenant_id)
     .eq('status', 'completed')
     .order('created_at', { ascending: false })
     .limit(60)
+
+  if (error) {
+    console.error('[galeria] erro ao buscar imagens:', error.message)
+  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -57,7 +65,7 @@ export default async function GaleriaPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {(images as GeneratedImage[]).map((img) => {
-            const displayUrl = img.selected_url ?? img.output_urls[0]
+            const displayUrl = img.selected_url ?? img.output_urls?.[0] ?? null
             return (
               <div
                 key={img.id}
@@ -70,6 +78,7 @@ export default async function GaleriaPage() {
                       alt="Imagem gerada"
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -77,7 +86,6 @@ export default async function GaleriaPage() {
                     </div>
                   )}
 
-                  {/* Overlay com ações */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-end justify-between p-3">
                     {displayUrl && (
                       <a
@@ -91,7 +99,7 @@ export default async function GaleriaPage() {
                         <Download className="w-4 h-4" />
                       </a>
                     )}
-                    {img.output_urls.length > 1 && (
+                    {(img.output_urls?.length ?? 0) > 1 && (
                       <span className="text-xs text-white bg-black/50 px-2 py-1 rounded-lg">
                         {img.output_urls.length} variações
                       </span>

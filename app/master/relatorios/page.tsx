@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createAdminClient } from '@/lib/supabase/server'
-import { formatCostUsd, formatDate } from '@/lib/utils'
+import { formatCostBrl } from '@/lib/utils'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { Tenant } from '@/lib/types'
@@ -71,7 +71,7 @@ export default async function RelatoriosPage() {
           { label: 'Legendas', value: grandTotal.captions.toString() },
           { label: 'Tokens entrada', value: grandTotal.tokensIn.toLocaleString() },
           { label: 'Tokens saída', value: grandTotal.tokensOut.toLocaleString() },
-          { label: 'Custo total (USD)', value: formatCostUsd(grandTotal.cost) },
+          { label: 'Custo total (USD)', value: formatCostBrl(grandTotal.cost) },
         ].map((item) => (
           <div key={item.label} className="bg-white rounded-2xl border border-gray-100 p-4">
             <p className="text-xs text-gray-400 mb-1">{item.label}</p>
@@ -115,7 +115,7 @@ export default async function RelatoriosPage() {
                   {row.total_tokens_output.toLocaleString()}
                 </td>
                 <td className="px-3 py-3 text-right font-medium text-bella-charcoal">
-                  {formatCostUsd(row.total_cost_usd)}
+                  {formatCostBrl(row.total_cost_usd)}
                 </td>
                 <td className="px-5 py-3 text-right text-xs text-gray-500">
                   {row.avg_generation_time_ms > 0
@@ -135,7 +135,7 @@ export default async function RelatoriosPage() {
               <td className="px-3 py-3 text-right">—</td>
               <td className="px-3 py-3 text-right text-xs">{grandTotal.tokensIn.toLocaleString()}</td>
               <td className="px-3 py-3 text-right text-xs">{grandTotal.tokensOut.toLocaleString()}</td>
-              <td className="px-5 py-3 text-right">{formatCostUsd(grandTotal.cost)}</td>
+              <td className="px-5 py-3 text-right">{formatCostBrl(grandTotal.cost)}</td>
               <td className="px-5 py-3" />
             </tr>
           </tfoot>

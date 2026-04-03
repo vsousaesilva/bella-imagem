@@ -17,9 +17,11 @@ const BIOTIPO_OPTIONS: Array<{ value: Biotipo; label: string }> = [
   { value: 'plus_size', label: 'Plus size' },
 ]
 const FAIXA_OPTIONS: Array<{ value: FaixaEtaria; label: string }> = [
+  { value: '0_18', label: '0–18 anos' },
   { value: '18_25', label: '18–25 anos' },
   { value: '26_35', label: '26–35 anos' },
   { value: '36_45', label: '36–45 anos' },
+  { value: '45_mais', label: 'Mais de 45 anos' },
 ]
 const GENERO_OPTIONS: Array<{ value: GeneroModelo; label: string }> = [
   { value: 'feminino', label: 'Feminino' },
@@ -216,7 +218,7 @@ export default function ConfiguracoesPage() {
       <section className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
         <h2 className="font-semibold text-bella-charcoal mb-1">Perfil padrão do modelo</h2>
         <p className="text-xs text-gray-400 mb-5">
-          Usado quando nenhuma foto de modelo é enviada na geração.
+          Usado quando nenhuma foto de modelo é enviada na geração ou quando não definidos os critérios na página de geração.
         </p>
 
         <div className="space-y-5">

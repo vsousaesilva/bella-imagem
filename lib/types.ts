@@ -8,7 +8,9 @@ export type PlanType = 'free' | 'starter' | 'pro' | 'business'
 
 export type TomDePele = 'clara' | 'media' | 'escura'
 export type Biotipo = 'magra' | 'media' | 'plus_size'
-export type FaixaEtaria = '18_25' | '26_35' | '36_45'
+export type FaixaEtaria = '0_18' | '18_25' | '26_35' | '36_45' | '45_mais'
+
+export type TamanhoPeca = 'infanto_juvenil' | 'P' | 'M' | 'G' | 'GG' | 'plus_size'
 export type GeneroModelo = 'feminino' | 'masculino' | 'neutro'
 
 export type AspectRatio = '1:1' | '4:5' | '9:16' | '16:9' | '3:4'
@@ -170,6 +172,8 @@ export interface GenerateImageRequest {
   backgroundPreset?: string
   backgroundCustom?: string
   aspectRatio?: AspectRatio
+  tamanhoPeca?: TamanhoPeca
+  tamanhoInfantil?: number  // 0-16 (anos), apenas quando tamanhoPeca = 'infanto_juvenil'
 }
 
 export interface GenerateImageResult {
@@ -222,6 +226,17 @@ export const ASPECT_RATIO_OPTIONS: Array<{ value: AspectRatio; label: string }> 
   { value: '16:9', label: '16:9 — Paisagem' },
   { value: '3:4', label: '3:4 — Retrato clássico' },
 ]
+
+export const TAMANHO_OPTIONS: Array<{ value: TamanhoPeca; label: string }> = [
+  { value: 'infanto_juvenil', label: 'Infanto Juvenil' },
+  { value: 'P', label: 'P' },
+  { value: 'M', label: 'M' },
+  { value: 'G', label: 'G' },
+  { value: 'GG', label: 'GG' },
+  { value: 'plus_size', label: 'Plus Size' },
+]
+
+export const TAMANHO_INFANTIL_ANOS = Array.from({ length: 17 }, (_, i) => i) // 0 a 16
 
 export const PLAN_LABELS: Record<PlanType, string> = {
   free: 'Gratuito',

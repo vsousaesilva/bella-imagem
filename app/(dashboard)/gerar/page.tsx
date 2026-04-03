@@ -4,8 +4,8 @@ import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { compressImage } from '@/lib/utils'
-import { BACKGROUND_PRESETS, ASPECT_RATIO_OPTIONS } from '@/lib/types'
-import type { AspectRatio } from '@/lib/types'
+import { BACKGROUND_PRESETS, ASPECT_RATIO_OPTIONS, TAMANHO_OPTIONS, TAMANHO_INFANTIL_ANOS } from '@/lib/types'
+import type { AspectRatio, TamanhoPeca } from '@/lib/types'
 import {
   Upload,
   X,
@@ -40,6 +40,8 @@ export default function GerarImagemPage() {
   const [backgroundCustom, setBackgroundCustom] = useState('')
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('4:5')
   const [showBgOptions, setShowBgOptions] = useState(false)
+  const [tamanhoPeca, setTamanhoPeca] = useState<TamanhoPeca | ''>('')
+  const [tamanhoInfantil, setTamanhoInfantil] = useState<number>(8)
 
   // Resultado
   const [result, setResult] = useState<GenerationResult | null>(null)
@@ -85,6 +87,8 @@ export default function GerarImagemPage() {
         backgroundPreset: backgroundPreset || undefined,
         backgroundCustom: backgroundCustom || undefined,
         aspectRatio,
+        tamanhoPeca: tamanhoPeca || undefined,
+        tamanhoInfantil: tamanhoPeca === 'infanto_juvenil' ? tamanhoInfantil : undefined,
       }
 
       const res = await fetch('/api/images/generate', {
@@ -161,6 +165,8 @@ export default function GerarImagemPage() {
     setBackgroundPreset('')
     setBackgroundCustom('')
     setAspectRatio('4:5')
+    setTamanhoPeca('')
+    setTamanhoInfantil(8)
   }
 
   if (step === 'generating') return <GeneratingState />
@@ -275,6 +281,44 @@ export default function GerarImagemPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Tamanho da peça */}
+          <div>
+            <label className="block text-sm font-medium text-bella-charcoal mb-2">
+              Tamanho da peça
+              <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {TAMANHO_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setTamanhoPeca(tamanhoPeca === opt.value ? '' : opt.value)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-xl border text-sm transition',
+                    tamanhoPeca === opt.value
+                      ? 'border-bella-rose bg-bella-rose/5 text-bella-rose font-medium'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {tamanhoPeca === 'infanto_juvenil' && (
+              <div className="mt-2">
+                <label className="block text-xs text-gray-500 mb-1.5">Idade (anos)</label>
+                <select
+                  value={tamanhoInfantil}
+                  onChange={(e) => setTamanhoInfantil(Number(e.target.value))}
+                  className="px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-bella-rose/30 focus:border-bella-rose transition"
+                >
+                  {TAMANHO_INFANTIL_ANOS.map((ano) => (
+                    <option key={ano} value={ano}>{ano === 0 ? 'RN (Recém-nascido)' : `${ano} anos`}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Fundo / Paisagem */}

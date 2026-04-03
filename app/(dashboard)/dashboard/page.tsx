@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { formatDate, formatCostUsd, quotaPercent } from '@/lib/utils'
+import { formatDate, formatCostBrl, quotaPercent } from '@/lib/utils'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { Tenant, GeneratedImage } from '@/lib/types'
@@ -25,13 +25,14 @@ export default async function DashboardPage() {
   if (!profile?.tenant_id) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-bold text-bella-charcoal">Bem-vinda!</h1>
+        <h1 className="text-2xl font-bold text-bella-charcoal">Bem-vindo(a)!</h1>
         <p className="text-gray-500 mt-2">Aguarde a configuração do seu acesso pelo administrador.</p>
       </div>
     )
   }
 
   const tenant = profile.tenant as Tenant
+  const isMaster = profile.role === 'master'
 
   // Últimas imagens geradas
   const { data: recentImages } = await admin
@@ -68,13 +69,16 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-bella-charcoal">
-          Olá, {profile.full_name?.split(' ')[0] ?? 'Bem-vinda'}!
+          Olá, {profile.full_name?.split(' ')[0] ?? 'Bem-vindo(a)'}!
         </h1>
         <p className="text-gray-500 mt-1">Aqui está um resumo do seu uso este mês.</p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className={cn(
+        'grid gap-4 mb-8',
+        isMaster ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'
+      )}>
         <StatCard
           icon={<ImageIcon className="w-5 h-5 text-bella-rose" />}
           label="Imagens geradas"
@@ -88,17 +92,19 @@ export default async function DashboardPage() {
           sub="este mês"
         />
         <StatCard
-          icon={<TrendingUp className="w-5 h-5 text-green-500" />}
-          label="Custo total (USD)"
-          value={formatCostUsd(totalCostUsd)}
-          sub="este mês"
-        />
-        <StatCard
           icon={<Clock className="w-5 h-5 text-amber-500" />}
           label="Tempo médio"
           value={avgTimeMs > 0 ? `${(avgTimeMs / 1000).toFixed(1)}s` : '—'}
           sub="por geração"
         />
+        {isMaster && (
+          <StatCard
+            icon={<TrendingUp className="w-5 h-5 text-green-500" />}
+            label="Custo total"
+            value={formatCostBrl(totalCostUsd)}
+            sub="este mês"
+          />
+        )}
       </div>
 
       {/* Cota */}
@@ -142,11 +148,11 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {(recentImages as GeneratedImage[]).map((img) => {
-              const url = img.selected_url ?? img.output_urls[0]
+              const url = img.selected_url ?? img.output_urls?.[0] ?? null
               return (
                 <a
                   key={img.id}
-                  href={`/galeria?id=${img.id}`}
+                  href="/galeria"
                   className="aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 block group relative"
                 >
                   {url && (
@@ -155,6 +161,7 @@ export default async function DashboardPage() {
                       alt="Imagem gerada"
                       fill
                       className="object-cover group-hover:scale-105 transition"
+                      unoptimized
                     />
                   )}
                 </a>

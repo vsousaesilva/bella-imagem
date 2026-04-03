@@ -96,12 +96,31 @@ const ASPECT_RATIO_MAP: Record<AspectRatio, string> = {
 // Construção do prompt de try-on fashion
 // ──────────────────────────────────────────────────────────────
 
+function buildSizeText(tamanhoPeca?: string, tamanhoInfantil?: number): string {
+  if (!tamanhoPeca) return ''
+  if (tamanhoPeca === 'infanto_juvenil') {
+    const idade = tamanhoInfantil ?? 8
+    return `The clothing is sized for a child aged ${idade} years old.`
+  }
+  const sizeMap: Record<string, string> = {
+    P: 'small (size S)',
+    M: 'medium (size M)',
+    G: 'large (size L)',
+    GG: 'extra large (size XL)',
+    plus_size: 'plus size',
+  }
+  return `The clothing size is ${sizeMap[tamanhoPeca] ?? tamanhoPeca}.`
+}
+
 export function buildFashionPrompt(
   tenant: Tenant,
   hasModelPhoto: boolean,
-  backgroundText: string
+  backgroundText: string,
+  tamanhoPeca?: string,
+  tamanhoInfantil?: number
 ): string {
   const modelDesc = buildModelProfileText(tenant)
+  const sizeText = buildSizeText(tamanhoPeca, tamanhoInfantil)
 
   if (hasModelPhoto) {
     return [
@@ -109,20 +128,22 @@ export function buildFashionPrompt(
       'Using the provided person photo as the model, show them wearing the exact clothing/accessory from the product image.',
       'Keep the model\'s face, body proportions and skin tone from the reference photo.',
       'The clothing must match exactly the product provided.',
+      sizeText,
       `Background: ${backgroundText}.`,
       'High resolution, sharp details, studio lighting, commercial quality.',
       'No text, no watermarks.',
-    ].join(' ')
+    ].filter(Boolean).join(' ')
   }
 
   return [
     'Professional fashion photography for e-commerce.',
     `Create a ${modelDesc} wearing the exact clothing/accessory shown in the product image.`,
     'Show the full outfit clearly. The clothing must match exactly the product provided.',
+    sizeText,
     `Background: ${backgroundText}.`,
     'High resolution, sharp details, studio lighting, commercial quality.',
     'No text, no watermarks.',
-  ].join(' ')
+  ].filter(Boolean).join(' ')
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -202,7 +223,7 @@ export async function generateFashionImages(
 
   const backgroundText = buildBackgroundText(req.backgroundPreset, req.backgroundCustom)
   const hasModelPhoto = !!(req.modelImageBase64 && req.modelImageMimeType)
-  const prompt = buildFashionPrompt(tenant, hasModelPhoto, backgroundText)
+  const prompt = buildFashionPrompt(tenant, hasModelPhoto, backgroundText, req.tamanhoPeca, req.tamanhoInfantil)
   const aspectRatio = req.aspectRatio ?? '4:5'
 
   // Monta partes de imagem para o Gemini
