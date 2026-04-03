@@ -85,7 +85,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Cota */}
-      <div className="rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="rounded-2xl p-6 mb-8" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="font-medium text-bella-white">Cota de imagens</h2>
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
         {!recentImages?.length ? (
           <div
             className="rounded-2xl p-12 text-center"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+            style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
           >
             <ImageIcon className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.1)' }} />
             <p className="text-bella-gray text-sm">Nenhuma imagem gerada ainda.</p>
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
                   key={img.id}
                   href="/galeria"
                   className="aspect-[4/5] rounded-xl overflow-hidden block group relative"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--main-hover-bg)', border: '1px solid var(--main-border)' }}
                 >
                   {url && (
                     <Image
@@ -161,7 +161,7 @@ function StatCard({ icon, label, value, sub }: {
   return (
     <div
       className="rounded-2xl p-5 transition-all duration-300"
-      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+      style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
     >
       <div className="flex items-center gap-2 mb-3">
         {icon}

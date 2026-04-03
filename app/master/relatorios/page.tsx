@@ -70,7 +70,7 @@ export default async function RelatoriosPage() {
           { label: 'Tokens saída',   value: grandTotal.tokensOut.toLocaleString() },
           { label: 'Custo total',    value: formatCostBrl(grandTotal.cost) },
         ].map((item) => (
-          <div key={item.label} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div key={item.label} className="rounded-2xl p-4" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
             <p className="text-[10px] text-bella-gray tracking-wide uppercase mb-1">{item.label}</p>
             <p className="text-lg font-display font-medium text-bella-white">{item.value}</p>
           </div>
@@ -78,10 +78,10 @@ export default async function RelatoriosPage() {
       </div>
 
       {/* Tabela */}
-      <div className="rounded-2xl overflow-x-auto" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="rounded-2xl overflow-x-auto" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <table className="w-full text-sm min-w-[900px]">
           <thead>
-            <tr className="text-[10px] text-bella-gray tracking-widest uppercase" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <tr className="text-[10px] text-bella-gray tracking-widest uppercase" style={{ borderBottom: '1px solid var(--main-border)' }}>
               <th className="text-left px-5 py-3">Empresa</th>
               <th className="text-left px-3 py-3">Plano</th>
               <th className="text-right px-3 py-3">Imagens</th>
@@ -95,7 +95,7 @@ export default async function RelatoriosPage() {
           </thead>
           <tbody>
             {report.map((row) => (
-              <tr key={row.tenant_id} className="transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+              <tr key={row.tenant_id} className="transition-colors" style={{ borderBottom: '1px solid var(--main-border)' }}>
                 <td className="px-5 py-3 font-medium text-bella-white">{row.tenant_name}</td>
                 <td className="px-3 py-3">
                   <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[row.plan])}>

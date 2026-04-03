@@ -216,7 +216,7 @@ export default function GerarImagemPage() {
                   className="px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200"
                   style={aspectRatio === opt.value
                     ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }
-                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+                    : { background: 'var(--main-bg-subtle)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--main-text-sub)' }
                   }
                 >
                   {opt.label}
@@ -236,7 +236,7 @@ export default function GerarImagemPage() {
                   className="px-3 py-1.5 rounded-xl text-sm transition-all duration-200"
                   style={tamanhoPeca === opt.value
                     ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }
-                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+                    : { background: 'var(--main-bg-subtle)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--main-text-sub)' }
                   }
                 >
                   {opt.label}
@@ -266,7 +266,7 @@ export default function GerarImagemPage() {
               <button
                 onClick={() => setShowBgOptions(!showBgOptions)}
                 className="w-full px-4 py-2.5 rounded-xl text-sm text-left flex items-center justify-between transition-all duration-200"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }}
+                style={{ background: 'var(--main-bg-subtle)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--main-text-sub)' }}
               >
                 <span>
                   {backgroundPreset
@@ -329,7 +329,7 @@ function ImageUploadBox({ preview, placeholder, onClick, onRemove, compact = fal
   return (
     <div
       className={cn('relative rounded-xl overflow-hidden group transition-all duration-200 cursor-pointer', compact ? 'h-32' : 'h-56')}
-      style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.1)' }}
+      style={{ background: 'var(--main-bg-subtle)', border: '2px dashed rgba(255,255,255,0.1)' }}
       onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(201,169,110,0.3)')}
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = preview ? 'rgba(201,169,110,0.2)' : 'rgba(255,255,255,0.1)')}
     >
@@ -408,14 +408,14 @@ function ResultState({ result, selectedVariation, onSelectVariation, captionText
               : { border: '2px solid rgba(255,255,255,0.06)' }
             }
           >
-            <div className="aspect-[4/5] relative" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div className="aspect-[4/5] relative" style={{ background: 'var(--main-bg-subtle)' }}>
               <Image src={url} alt={`Variação ${i + 1}`} fill className="object-cover" />
             </div>
             <div className="absolute top-3 left-3">
               <span className="text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide"
                 style={selectedVariation === i
                   ? { background: 'linear-gradient(135deg, #c9a96e, #dfc9a0)', color: '#0a0a0a' }
-                  : { background: 'rgba(0,0,0,0.6)', color: '#b0b0b0' }
+                  : { background: 'rgba(0,0,0,0.6)', color: 'var(--main-text-muted)' }
                 }
               >
                 Variação {i + 1}
@@ -456,7 +456,7 @@ function ResultState({ result, selectedVariation, onSelectVariation, captionText
       </div>
 
       {captionText && (
-        <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="rounded-2xl p-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
           <h3 className="font-medium text-bella-white mb-3">Legenda gerada</h3>
           <p className="text-sm text-bella-gray-light whitespace-pre-line leading-relaxed">{captionText}</p>
           <button onClick={() => navigator.clipboard.writeText(captionText)}

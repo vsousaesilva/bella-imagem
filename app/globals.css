@@ -2,25 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════════
+   Variáveis de tema — área principal (main content)
+   A sidebar usa .sidebar-dark e ignora essas vars.
+   ══════════════════════════════════════════════════ */
+:root {
+  /* Modo escuro (padrão) */
+  --main-bg:         #0a0a0a;
+  --main-bg-subtle:  rgba(255,255,255,0.02);
+  --main-border:     rgba(255,255,255,0.05);
+  --main-border-hover: rgba(201,169,110,0.15);
+  --main-text:       #fefefe;
+  --main-text-sub:   #6b6b6b;
+  --main-text-muted: #b0b0b0;
+  --main-input-bg:   rgba(255,255,255,0.03);
+  --main-input-border: rgba(255,255,255,0.08);
+  --main-hover-bg:   rgba(255,255,255,0.04);
+  --main-scrollbar-track: #0a0a0a;
+  --shimmer-a:       rgba(255,255,255,0.04);
+  --shimmer-b:       rgba(255,255,255,0.08);
+}
+
+html.light {
+  /* Modo claro */
+  --main-bg:         #faf6f0;
+  --main-bg-subtle:  #ffffff;
+  --main-border:     #e5e0d8;
+  --main-border-hover: rgba(201,169,110,0.35);
+  --main-text:       #1a1a1a;
+  --main-text-sub:   #6b6b6b;
+  --main-text-muted: #4a4a4a;
+  --main-input-bg:   #ffffff;
+  --main-input-border: #d4cfc8;
+  --main-hover-bg:   #f0ebe3;
+  --main-scrollbar-track: #faf6f0;
+  --shimmer-a:       #e8e3db;
+  --shimmer-b:       #f0ebe3;
+}
+
 @layer base {
   * { box-sizing: border-box; }
 
   body {
     font-family: var(--font-body), system-ui, sans-serif;
-    background: #0a0a0a;
-    color: #fefefe;
+    background: var(--main-bg);
+    color: var(--main-text);
     -webkit-font-smoothing: antialiased;
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
-  /* Scrollbar gold */
+  /* Scrollbar adaptável */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-track { background: var(--main-scrollbar-track); }
   ::-webkit-scrollbar-thumb { background: #c9a96e; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #dfc9a0; }
 }
 
 @layer components {
-  /* ── Botão primário (gradiente gold) ── */
+  /* ── Botão primário (gradiente gold — igual em ambos os modos) ── */
   .btn-primary {
     @apply relative overflow-hidden inline-flex items-center justify-center gap-2
            px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide
@@ -54,38 +93,39 @@
     transform: translateY(-2px);
   }
 
-  /* ── Card glassmorphism escuro ── */
-  .card-dark {
+  /* ── Card adaptável ao tema ── */
+  .card-theme {
     @apply rounded-2xl p-6 transition-all duration-300;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--main-bg-subtle);
+    border: 1px solid var(--main-border);
   }
-  .card-dark:hover {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(201,169,110,0.15);
+  .card-theme:hover {
+    background: var(--main-hover-bg);
+    border-color: var(--main-border-hover);
   }
 
-  /* ── Input escuro ── */
+  /* ── Input adaptável ao tema ── */
   .input-field {
-    @apply w-full px-4 py-2.5 rounded-xl text-sm text-bella-white
-           placeholder:text-bella-gray
+    @apply w-full px-4 py-2.5 rounded-xl text-sm
            focus:outline-none focus:ring-1
            transition-all duration-200;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--main-input-bg);
+    border: 1px solid var(--main-input-border);
+    color: var(--main-text);
   }
+  .input-field::placeholder { color: var(--main-text-sub); }
   .input-field:focus {
     border-color: rgba(201,169,110,0.4);
     box-shadow: 0 0 0 2px rgba(201,169,110,0.1);
   }
 
-  /* ── Shimmer skeleton ── */
+  /* ── Shimmer skeleton adaptável ── */
   .shimmer {
     background: linear-gradient(
       90deg,
-      rgba(255,255,255,0.04) 25%,
-      rgba(255,255,255,0.08) 50%,
-      rgba(255,255,255,0.04) 75%
+      var(--shimmer-a) 25%,
+      var(--shimmer-b) 50%,
+      var(--shimmer-a) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -106,4 +146,15 @@
     height: 1px;
     background: linear-gradient(90deg, transparent 0%, rgba(201,169,110,0.2) 50%, transparent 100%);
   }
+
+  /* ══════════════════════════════════════════
+     SIDEBAR DARK — sempre escura, independente
+     do tema da área principal
+     ══════════════════════════════════════════ */
+  .sidebar-dark {
+    background: #1a1a1a !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    color: #fefefe;
+  }
+  .sidebar-dark * { color: inherit; }
 }

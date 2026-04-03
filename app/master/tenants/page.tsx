@@ -35,10 +35,10 @@ export default async function TenantsPage() {
         <p className="text-bella-gray text-sm mt-1">{tenants?.length ?? 0} empresas cadastradas.</p>
       </div>
 
-      <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-[10px] text-bella-gray tracking-widest uppercase" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <tr className="text-[10px] text-bella-gray tracking-widest uppercase" style={{ borderBottom: '1px solid var(--main-border)' }}>
               <th className="text-left px-5 py-3">Empresa</th>
               <th className="text-left px-4 py-3">Plano</th>
               <th className="text-center px-4 py-3">Cota</th>
@@ -50,8 +50,8 @@ export default async function TenantsPage() {
           </thead>
           <tbody>
             {tenantStats.map((t) => (
-              <tr key={t.id} className="transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+              <tr key={t.id} className="transition-colors" style={{ borderBottom: '1px solid var(--main-border)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--main-hover-bg)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <td className="px-5 py-3">
@@ -81,7 +81,7 @@ export default async function TenantsPage() {
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
                     style={t.active
                       ? { background: 'rgba(74,222,128,0.1)', color: '#4ade80' }
-                      : { background: 'rgba(255,255,255,0.06)', color: '#6b6b6b' }
+                      : { background: 'rgba(255,255,255,0.06)', color: 'var(--main-text-sub)' }
                     }
                   >
                     {t.active ? 'Ativa' : 'Inativa'}

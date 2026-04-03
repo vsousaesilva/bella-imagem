@@ -23,9 +23,10 @@ const config: Config = {
           rose:        '#e8b4b8',
           'rose-light':'#f5d5d8',
           cream:       '#faf6f0',
-          white:       '#fefefe',
-          gray:        '#6b6b6b',
-          'gray-light':'#b0b0b0',
+          // Tokens dinâmicos — adaptam ao tema claro/escuro
+          white:       'var(--main-text)',
+          gray:        'var(--main-text-sub)',
+          'gray-light':'var(--main-text-muted)',
         },
       },
       fontFamily: {

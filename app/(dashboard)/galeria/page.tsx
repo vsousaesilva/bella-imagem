@@ -51,7 +51,7 @@ export default async function GaleriaPage() {
       {!images?.length ? (
         <div
           className="rounded-2xl p-16 text-center"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+          style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
         >
           <ImageIcon className="w-12 h-12 mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.1)' }} />
           <p className="text-bella-gray">Nenhuma imagem gerada ainda.</p>
@@ -68,14 +68,14 @@ export default async function GaleriaPage() {
                 key={img.id}
                 className="group rounded-2xl overflow-hidden transition-all duration-300"
                 style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
+                  background: 'var(--main-bg-subtle)',
+                  border: '1px solid var(--main-border)',
                 }}
                 onMouseEnter={(e) => {
                   // handled via CSS group hover
                 }}
               >
-                <div className="aspect-[4/5] relative" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <div className="aspect-[4/5] relative" style={{ background: 'var(--main-bg-subtle)' }}>
                   {displayUrl ? (
                     <Image
                       src={displayUrl}

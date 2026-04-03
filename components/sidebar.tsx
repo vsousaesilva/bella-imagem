@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import type { Profile, Tenant } from '@/lib/types'
 import { PLAN_COLORS, PLAN_LABELS } from '@/lib/types'
 import Image from 'next/image'
+import { ThemeToggle } from '@/components/theme-toggle'
 import {
   ImageIcon,
   LayoutGrid,
@@ -43,10 +44,7 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
     : 0
 
   return (
-    <aside
-      className="w-60 flex-shrink-0 flex flex-col min-h-screen"
-      style={{ background: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.06)' }}
-    >
+    <aside className="sidebar-dark w-60 flex-shrink-0 flex flex-col min-h-screen">
       {/* Logo */}
       <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <Image
@@ -140,7 +138,7 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
 
       {/* User + Logout */}
       <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-semibold text-bella-gold"
             style={{ background: 'rgba(201,169,110,0.12)' }}
@@ -161,6 +159,7 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
             <LogOut className="w-4 h-4" />
           </button>
         </div>
+        <ThemeToggle />
       </div>
     </aside>
   )

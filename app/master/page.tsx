@@ -57,11 +57,11 @@ export default async function MasterOverviewPage() {
       </div>
 
       {/* Planos */}
-      <div className="rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="rounded-2xl p-6 mb-8" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <h2 className="font-medium text-bella-white mb-4">Distribuição por plano</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {(['free', 'starter', 'pro', 'business'] as const).map((plan) => (
-            <div key={plan} className="text-center p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div key={plan} className="text-center p-4 rounded-xl" style={{ background: 'var(--main-bg-subtle)' }}>
               <p className="text-2xl font-display font-medium text-bella-white">{planCounts[plan] ?? 0}</p>
               <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium mt-1 inline-block tracking-wide', PLAN_COLORS[plan])}>
                 {PLAN_LABELS[plan]}
@@ -72,11 +72,11 @@ export default async function MasterOverviewPage() {
       </div>
 
       {/* Últimas atividades */}
-      <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="rounded-2xl p-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <h2 className="font-medium text-bella-white mb-4">Últimas atividades</h2>
         <div className="space-y-1">
           {recentLogs?.map((log) => (
-            <div key={log.id} className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            <div key={log.id} className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--main-border)' }}>
               <div className="flex items-center gap-3">
                 {log.action === 'generate_image'
                   ? <ImageIcon className="w-4 h-4 text-bella-gold" />
@@ -105,7 +105,7 @@ export default async function MasterOverviewPage() {
 
 function KpiCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+    <div className="rounded-2xl p-5" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
       <div className="flex items-center gap-2 mb-3">{icon}<span className="text-sm text-bella-gray">{label}</span></div>
       <p className="text-2xl font-display font-medium text-bella-white">{value}</p>
     </div>

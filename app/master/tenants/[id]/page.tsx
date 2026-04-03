@@ -141,7 +141,7 @@ export default function EditTenantPage() {
       )}
 
       {/* Dados da empresa */}
-      <section className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section className="rounded-2xl p-6 mb-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <h2 className="font-medium text-bella-white mb-5">Dados da empresa</h2>
         <div className="space-y-5">
           <div>
@@ -164,7 +164,7 @@ export default function EditTenantPage() {
                   className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
                   style={plan === p
                     ? { background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.4)', color: '#c9a96e' }
-                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+                    : { background: 'var(--main-bg-subtle)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--main-text-sub)' }
                   }
                 >
                   {PLAN_LABELS[p]}
@@ -200,7 +200,7 @@ export default function EditTenantPage() {
       </section>
 
       {/* Usuários */}
-      <section className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section className="rounded-2xl p-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-medium text-bella-white">Usuários</h2>
           <span className="text-[11px] text-bella-gray">{users.length} usuário(s)</span>
@@ -211,7 +211,7 @@ export default function EditTenantPage() {
         ) : (
           <div className="space-y-1">
             {users.map((u) => (
-              <div key={u.id} className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <div key={u.id} className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid var(--main-border)' }}>
                 <div>
                   <p className="text-sm font-medium text-bella-white">{u.full_name ?? '—'}</p>
                   <p className="text-[11px] text-bella-gray capitalize">{u.role}</p>
@@ -221,7 +221,7 @@ export default function EditTenantPage() {
                     value={u.role}
                     onChange={(e) => handleChangeRole(u.id, e.target.value as UserRole)}
                     className="text-xs px-2 py-1.5 rounded-lg focus:outline-none transition-all"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#b0b0b0' }}
+                    style={{ background: 'var(--main-hover-bg)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--main-text-muted)' }}
                   >
                     <option value="administrador">Administrador</option>
                     <option value="operador">Operador</option>
@@ -231,7 +231,7 @@ export default function EditTenantPage() {
                     className="text-[11px] px-2.5 py-1 rounded-lg font-medium transition-all duration-200"
                     style={u.active
                       ? { background: 'rgba(74,222,128,0.1)', color: '#4ade80', border: '1px solid rgba(74,222,128,0.2)' }
-                      : { background: 'rgba(255,255,255,0.04)', color: '#6b6b6b', border: '1px solid rgba(255,255,255,0.08)' }
+                      : { background: 'var(--main-hover-bg)', color: 'var(--main-text-sub)', border: '1px solid rgba(255,255,255,0.08)' }
                     }
                   >
                     {u.active ? 'Ativo' : 'Inativo'}

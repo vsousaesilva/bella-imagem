@@ -149,7 +149,7 @@ export default function ConfiguracoesPage() {
       )}
 
       {/* Contexto do negócio */}
-      <section className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section className="rounded-2xl p-6 mb-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <h2 className="font-medium text-bella-white mb-1">Contexto da marca</h2>
         <p className="text-[11px] text-bella-gray mb-5">Usado para gerar legendas personalizadas. Seja conciso e objetivo.</p>
 
@@ -204,7 +204,7 @@ export default function ConfiguracoesPage() {
       </section>
 
       {/* Perfil do modelo */}
-      <section className="rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section className="rounded-2xl p-6 mb-8" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <h2 className="font-medium text-bella-white mb-1">Perfil padrão do modelo</h2>
         <p className="text-[11px] text-bella-gray mb-5">
           Usado quando nenhuma foto de modelo é enviada na geração ou quando não definidos os critérios na página de geração.
@@ -260,7 +260,7 @@ function OptionButton({ active, onClick, children }: { active: boolean; onClick:
       className="px-3 py-2 rounded-xl text-sm text-left transition-all duration-200"
       style={active
         ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }
-        : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b6b6b' }
+        : { background: 'var(--main-bg-subtle)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--main-text-sub)' }
       }
     >
       {children}
