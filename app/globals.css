@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 30% 98%;
+    --foreground: 0 0% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 18%;
+    --primary: 326 84% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 40% 94%;
+    --secondary-foreground: 0 0% 18%;
+    --muted: 30 20% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 326 84% 95%;
+    --accent-foreground: 326 84% 40%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 326 84% 51%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Shimmer skeleton */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--secondary)) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Campo de formulário padrão */
+.input-field {
+  @apply w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700
+    placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-bella-rose/30
+    focus:border-bella-rose transition;
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
