@@ -10,7 +10,7 @@ import type {
   AspectRatio,
 } from '@/lib/types'
 
-const GEMINI_MODEL = 'gemini-2.0-flash-preview-image-generation'
+const GEMINI_MODEL = 'gemini-2.0-flash-exp-image-generation'
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 // Custo aproximado Gemini 2.0 Flash (USD por 1k tokens)
