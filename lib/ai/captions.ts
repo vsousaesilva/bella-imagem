@@ -68,8 +68,12 @@ ${req.imageDescription ? `Descrição do look/peça: ${req.imageDescription}` : 
 Crie uma legenda de ${platform} para esse post de moda.`
 
   const body = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: [{ parts: [{ text: userPrompt }] }],
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+      },
+    ],
     generationConfig: {
       temperature: 0.9,
       maxOutputTokens: 512,

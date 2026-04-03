@@ -74,6 +74,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ caption: result.caption })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro desconhecido'
+    console.error('[bella-imagem] generate-caption ERRO:', message)
     await admin.from('usage_logs').insert({
       tenant_id: profile.tenant_id,
       user_id: user.id,
@@ -81,6 +82,6 @@ export async function POST(request: Request) {
       success: false,
       error_message: message,
     })
-    return NextResponse.json({ error: 'Falha ao gerar legenda.' }, { status: 500 })
+    return NextResponse.json({ error: 'Falha ao gerar legenda.', detail: message }, { status: 500 })
   }
 }
