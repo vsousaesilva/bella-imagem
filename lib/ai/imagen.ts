@@ -119,9 +119,9 @@ export function buildFashionPrompt(
   hasModelPhoto: boolean,
   backgroundText: string,
   tamanhoPeca?: string,
-  tamanhoInfantil?: number
+  tamanhoInfantil?: number,
+  modelDescricaoLivre?: string
 ): string {
-  const modelDesc = buildModelProfileText(tenant)
   const sizeText = buildSizeText(tamanhoPeca, tamanhoInfantil)
 
   if (hasModelPhoto) {
@@ -137,11 +137,26 @@ export function buildFashionPrompt(
     ].filter(Boolean).join(' ')
   }
 
+  // Sem foto de modelo: determina a descrição do modelo por prioridade
+  // 1. Orientação livre digitada na geração
+  // 2. Peça infanto-juvenil → modelo criança (perfil adulto do tenant seria contraditório)
+  // 3. Perfil padrão do tenant (configurações)
+  let modelIntro: string
+  if (modelDescricaoLivre && modelDescricaoLivre.trim()) {
+    modelIntro = `Create a model described as: "${modelDescricaoLivre.trim()}" wearing the exact clothing/accessory shown in the product image.`
+  } else if (tamanhoPeca === 'infanto_juvenil') {
+    const idade = tamanhoInfantil ?? 8
+    modelIntro = `Show the exact clothing on an appropriate child model aged around ${idade} years old.`
+  } else {
+    const modelDesc = buildModelProfileText(tenant)
+    modelIntro = `Create a ${modelDesc} wearing the exact clothing/accessory shown in the product image.`
+  }
+
   return [
     'Professional fashion photography for e-commerce.',
-    `Create a ${modelDesc} wearing the exact clothing/accessory shown in the product image.`,
+    modelIntro,
     'Show the full outfit clearly. The clothing must match exactly the product provided.',
-    sizeText,
+    tamanhoPeca !== 'infanto_juvenil' ? sizeText : '',
     `Background: ${backgroundText}.`,
     'High resolution, sharp details, studio lighting, commercial quality.',
     'No text, no watermarks.',
@@ -225,7 +240,7 @@ export async function generateFashionImages(
 
   const backgroundText = buildBackgroundText(req.backgroundPreset, req.backgroundCustom)
   const hasModelPhoto = !!(req.modelImageBase64 && req.modelImageMimeType)
-  const prompt = buildFashionPrompt(tenant, hasModelPhoto, backgroundText, req.tamanhoPeca, req.tamanhoInfantil)
+  const prompt = buildFashionPrompt(tenant, hasModelPhoto, backgroundText, req.tamanhoPeca, req.tamanhoInfantil, req.modelDescricaoLivre)
   const aspectRatio = req.aspectRatio ?? '4:5'
 
   // Monta partes de imagem para o Gemini

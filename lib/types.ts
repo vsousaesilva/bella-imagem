@@ -174,6 +174,7 @@ export interface GenerateImageRequest {
   aspectRatio?: AspectRatio
   tamanhoPeca?: TamanhoPeca
   tamanhoInfantil?: number  // 0-16 (anos), apenas quando tamanhoPeca = 'infanto_juvenil'
+  modelDescricaoLivre?: string  // sobrescreve o perfil padrão do tenant quando preenchido
 }
 
 export interface GenerateImageResult {

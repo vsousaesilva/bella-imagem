@@ -36,6 +36,7 @@ export default function GerarImagemPage() {
   const [clothingPreview, setClothingPreview] = useState<string | null>(null)
   const [modelFile, setModelFile] = useState<File | null>(null)
   const [modelPreview, setModelPreview] = useState<string | null>(null)
+  const [modelDescricaoLivre, setModelDescricaoLivre] = useState('')
   const [backgroundPreset, setBackgroundPreset] = useState<string>('')
   const [backgroundCustom, setBackgroundCustom] = useState('')
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('4:5')
@@ -89,6 +90,7 @@ export default function GerarImagemPage() {
         aspectRatio,
         tamanhoPeca: tamanhoPeca || undefined,
         tamanhoInfantil: tamanhoPeca === 'infanto_juvenil' ? tamanhoInfantil : undefined,
+        modelDescricaoLivre: !modelFile && modelDescricaoLivre.trim() ? modelDescricaoLivre.trim() : undefined,
       }
 
       const res = await fetch('/api/images/generate', {
@@ -162,6 +164,7 @@ export default function GerarImagemPage() {
     setClothingPreview(null)
     setModelFile(null)
     setModelPreview(null)
+    setModelDescricaoLivre('')
     setBackgroundPreset('')
     setBackgroundCustom('')
     setAspectRatio('4:5')
@@ -236,7 +239,7 @@ export default function GerarImagemPage() {
               <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
             </label>
             <p className="text-xs text-gray-400 mb-2">
-              Sem foto, o modelo será escolhido pela IA conforme o perfil configurado.
+              Sem foto, o modelo será escolhido pela IA conforme as orientações abaixo.
             </p>
             <input
               ref={modelInputRef}
@@ -256,6 +259,26 @@ export default function GerarImagemPage() {
               compact
             />
           </div>
+
+          {/* Orientação do modelo — só visível quando não há foto de modelo */}
+          {!modelFile && (
+            <div>
+              <label className="block text-sm font-medium text-bella-charcoal mb-1">
+                Orientação do modelo
+                <span className="text-xs text-gray-400 ml-2 font-normal">opcional</span>
+              </label>
+              <p className="text-xs text-gray-400 mb-2">
+                Descreva o modelo para esta geração. Se em branco, usa o perfil padrão configurado nas configurações.
+              </p>
+              <textarea
+                value={modelDescricaoLivre}
+                onChange={(e) => setModelDescricaoLivre(e.target.value)}
+                placeholder="Ex: mulher jovem, pele clara, cabelos longos, estilo esportivo..."
+                rows={3}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-bella-rose/30 focus:border-bella-rose transition"
+              />
+            </div>
+          )}
         </div>
 
         {/* Coluna direita — opções de geração */}
