@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react'
 
 interface SidebarProps {
