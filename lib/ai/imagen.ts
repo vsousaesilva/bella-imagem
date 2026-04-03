@@ -137,7 +137,7 @@ interface GeminiPart {
 async function callGemini(
   prompt: string,
   imageParts: GeminiPart[],
-  aspectRatio: AspectRatio
+  _aspectRatio: AspectRatio
 ): Promise<{ base64: string; mimeType: string; tokensInput: number; tokensOutput: number }> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY não configurada')
@@ -153,11 +153,6 @@ async function callGemini(
     ],
     generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
-      candidateCount: 1,
-      imageGenerationConfig: {
-        numberOfImages: 1,
-        aspectRatio: ASPECT_RATIO_MAP[aspectRatio],
-      },
     },
   }
 
