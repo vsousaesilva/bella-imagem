@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Sparkles, AlertCircle } from 'lucide-react'
+import NextImage from 'next/image'
+import { AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const supabase = createClient()
@@ -57,16 +58,15 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 mb-3">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #c9a96e, #dfc9a0)' }}
-            >
-              <Sparkles className="w-4 h-4 text-bella-black" />
-            </div>
-            <span className="font-display text-2xl font-medium text-bella-white tracking-tight">
-              Bella Imagem
-            </span>
+          <div className="flex justify-center mb-3">
+            <NextImage
+              src="/logo.png"
+              alt="Bella Imagem"
+              width={180}
+              height={54}
+              className="object-contain"
+              priority
+            />
           </div>
           <p className="text-sm text-bella-gray">Geração de imagens para moda com IA</p>
         </div>

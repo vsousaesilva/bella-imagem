@@ -6,13 +6,13 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { Profile, Tenant } from '@/lib/types'
 import { PLAN_COLORS, PLAN_LABELS } from '@/lib/types'
+import Image from 'next/image'
 import {
   ImageIcon,
   LayoutGrid,
   Settings,
   LogOut,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -47,20 +47,18 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
       style={{ background: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.06)' }}
     >
       {/* Logo */}
-      <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #c9a96e, #dfc9a0)' }}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-bella-black" />
-          </div>
-          <span className="font-display font-semibold text-bella-white tracking-tight text-sm">
-            Bella Imagem
-          </span>
-        </div>
+      <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <Image
+          src="/logo.png"
+          alt="Bella Imagem"
+          width={130}
+          height={40}
+          className="object-contain"
+          style={{ maxHeight: 40 }}
+          priority
+        />
         {tenant && (
-          <p className="text-[11px] text-bella-gray mt-1 truncate pl-[37px]">{tenant.name}</p>
+          <p className="text-[11px] text-bella-gray mt-1.5 truncate">{tenant.name}</p>
         )}
       </div>
 
