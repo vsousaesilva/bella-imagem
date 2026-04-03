@@ -34,9 +34,11 @@ function buildModelProfileText(tenant: Tenant): string {
       plus_size: 'corpo plus size',
     },
     faixa_etaria: {
+      '0_18': 'de 0 a 18 anos',
       '18_25': 'entre 18 e 25 anos',
       '26_35': 'entre 26 e 35 anos',
       '36_45': 'entre 36 e 45 anos',
+      '45_mais': 'acima de 45 anos',
     },
     genero: {
       feminino: 'mulher',
