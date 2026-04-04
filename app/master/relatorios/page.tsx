@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatCostBrl } from '@/lib/utils'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
+import type { PlanType } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 export default async function RelatoriosPage() {
@@ -104,8 +105,8 @@ export default async function RelatoriosPage() {
               <tr key={row.tenant_id} className="transition-colors" style={{ borderBottom: '1px solid var(--main-border)' }}>
                 <td className="px-5 py-3 font-medium text-bella-white">{row.tenant_name}</td>
                 <td className="px-3 py-3">
-                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[row.plan])}>
-                    {PLAN_LABELS[row.plan]}
+                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[row.plan as PlanType])}>
+                    {PLAN_LABELS[row.plan as PlanType]}
                   </span>
                 </td>
                 <td className="px-3 py-3 text-right text-bella-gray">{row.images_generated}</td>
