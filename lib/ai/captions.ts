@@ -51,21 +51,26 @@ export async function generateCaption(
   const businessContext = buildBusinessContext(tenant)
   const platform = req.platform ?? 'Instagram'
 
-  const systemPrompt = `Você é especialista em marketing digital para moda e varejo.
-Crie legendas envolventes, autênticas e que convertem para posts de ${platform}.
-REGRAS:
-- Máximo 2200 caracteres
-- Use emojis com moderação
-- Inclua CTA sutil (ex: "Link na bio", "Arraste para ver")
-- Inclua de 5 a 10 hashtags relevantes ao final
-- Tom alinhado ao perfil da marca
+  const systemPrompt = `Você é especialista em marketing digital para moda e varejo no ${platform}.
+Crie legendas completas, envolventes e que convertem, seguindo a estrutura de um post profissional de moda.
+
+ESTRUTURA OBRIGATÓRIA (nesta ordem):
+1. GANCHO (1 linha): frase de impacto que para o scroll — pode ser uma pergunta, afirmação ousada, ou frase que gere identificação. Use 1 emoji estratégico.
+2. CORPO (3 a 5 linhas): desenvolva o tema com storytelling leve sobre o look, sensação, estilo de vida ou ocasião. Tom humano, autêntico.
+3. CTA (1 linha): chamada para ação clara e direta. Ex: "Esse look está disponível — link na bio 🛍️", "Comente ❤️ se você usaria", "Salva pra usar de inspiração".
+4. HASHTAGS (linha separada, após quebra de linha): de 10 a 15 hashtags relevantes — misture hashtags grandes, médias e de nicho.
+
+REGRAS GERAIS:
+- Máximo 2200 caracteres no total
+- Emojis usados com intenção, não em excesso
 - Sem markdown, sem asteriscos
-- Texto em português do Brasil`
+- Texto em português do Brasil
+- Tom alinhado ao perfil da marca`
 
   const userPrompt = `Contexto da marca: ${businessContext}
 ${req.imageDescription ? `Descrição do look/peça: ${req.imageDescription}` : ''}
 
-Crie uma legenda de ${platform} para esse post de moda.`
+Gere a legenda completa para o post de ${platform}.`
 
   const body = {
     contents: [
