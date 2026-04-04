@@ -71,9 +71,6 @@ export default async function GaleriaPage() {
                   background: 'var(--main-bg-subtle)',
                   border: '1px solid var(--main-border)',
                 }}
-                onMouseEnter={(e) => {
-                  // handled via CSS group hover
-                }}
               >
                 <div className="aspect-[4/5] relative" style={{ background: 'var(--main-bg-subtle)' }}>
                   {displayUrl ? (
