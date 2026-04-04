@@ -81,7 +81,10 @@ Gere a legenda completa para o post de ${platform}.`
     ],
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 1024,
+      // Legenda até 2200 chars. Português ≈ 3 chars/token → ~733 tokens de conteúdo.
+      // Nova estrutura (gancho + corpo + CTA + 15 hashtags) pode atingir ~1100 tokens.
+      // 2048 garante margem 2× sem risco de corte.
+      maxOutputTokens: 2048,
     },
   }
 
