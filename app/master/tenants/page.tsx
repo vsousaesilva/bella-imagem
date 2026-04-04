@@ -30,7 +30,8 @@ export default async function TenantsPage({
   // Busca stats agregados apenas para os tenants desta página
   const tenantIds = tenants?.map((t) => t.id) ?? []
 
-  let tenantStats: Array<typeof tenants[0] & { imagesTotal: number; costTotal: number }> = []
+  type TenantRow = { id: string; name: string; slug: string; plan: string; active: boolean; quota_used: number; quota_limit: number; created_at: string; imagesTotal: number; costTotal: number }
+  let tenantStats: TenantRow[] = []
 
   if (tenantIds.length > 0) {
     const { data: stats } = await admin
