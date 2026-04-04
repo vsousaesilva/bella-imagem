@@ -65,12 +65,14 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
-                  active ? 'text-bella-gold font-medium' : 'text-bella-gray hover:text-bella-white'
+                  active ? 'font-medium' : 'hover:bg-white/5'
                 )}
                 style={active
-                  ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.15)' }
-                  : { border: '1px solid transparent' }
+                  ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.15)', color: '#c9a96e' }
+                  : { border: '1px solid transparent', color: '#8a8a8a' }
                 }
+                onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = '#fefefe' }}
+                onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = '#8a8a8a' }}
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 {label}

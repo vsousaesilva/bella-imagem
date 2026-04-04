@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Tenant, TomDePele, Biotipo, FaixaEtaria, GeneroModelo } from '@/lib/types'
-import { AlertCircle, CheckCircle2, Save } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Save, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TOM_OPTIONS: Array<{ value: TomDePele; label: string }> = [
@@ -38,10 +38,14 @@ const TONE_OPTIONS = [
 export default function ConfiguracoesPage() {
   const supabase = createClient()
   const [tenant, setTenant] = useState<Tenant | null>(null)
+  const [profileId, setProfileId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingProfile, setSavingProfile] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const [profileFeedback, setProfileFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
+  const [fullName, setFullName] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [businessSegment, setBusinessSegment] = useState('')
   const [businessDescription, setBusinessDescription] = useState('')
@@ -59,9 +63,12 @@ export default function ConfiguracoesPage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('tenant_id')
+        .select('tenant_id, full_name')
         .eq('id', user.id)
         .single()
+
+      setProfileId(user.id)
+      setFullName(profile?.full_name ?? '')
 
       if (!profile?.tenant_id) { setLoading(false); return }
 
@@ -87,6 +94,24 @@ export default function ConfiguracoesPage() {
     }
     load()
   }, [])
+
+  async function handleSaveProfile() {
+    if (!profileId) return
+    setSavingProfile(true)
+    setProfileFeedback(null)
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName.trim() || null })
+      .eq('id', profileId)
+
+    setSavingProfile(false)
+    if (error) {
+      setProfileFeedback({ type: 'error', msg: 'Erro ao salvar nome.' })
+    } else {
+      setProfileFeedback({ type: 'success', msg: 'Nome atualizado com sucesso!' })
+    }
+  }
 
   async function handleSave() {
     if (!tenant) return
@@ -131,6 +156,47 @@ export default function ConfiguracoesPage() {
         <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Configurações</h1>
         <p className="text-bella-gray text-sm mt-1">Configure o contexto da sua marca e o perfil padrão do modelo.</p>
       </div>
+
+      {/* Perfil do usuário */}
+      <section className="rounded-2xl p-6 mb-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
+        <div className="flex items-center gap-2 mb-1">
+          <User className="w-4 h-4 text-bella-gold" />
+          <h2 className="font-medium text-bella-white">Meu perfil</h2>
+        </div>
+        <p className="text-[11px] text-bella-gray mb-5">Seu nome aparece no menu lateral e no painel.</p>
+
+        {profileFeedback && (
+          <div
+            className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-4"
+            style={profileFeedback.type === 'success'
+              ? { background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80' }
+              : { background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }
+            }
+          >
+            {profileFeedback.type === 'success'
+              ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              : <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            }
+            {profileFeedback.msg}
+          </div>
+        )}
+
+        <Field label="Seu nome">
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            maxLength={80}
+            placeholder="Ex: Maria Souza"
+            className="input-field"
+          />
+        </Field>
+
+        <button onClick={handleSaveProfile} disabled={savingProfile} className="btn-primary mt-5">
+          <Save className="w-4 h-4" />
+          <span>{savingProfile ? 'Salvando...' : 'Salvar nome'}</span>
+        </button>
+      </section>
 
       {feedback && (
         <div

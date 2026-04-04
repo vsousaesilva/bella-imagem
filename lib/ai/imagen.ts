@@ -172,32 +172,45 @@ interface GeminiPart {
   inlineData?: { mimeType: string; data: string }
 }
 
+const ASPECT_RATIO_LABELS: Record<AspectRatio, string> = {
+  '1:1':  'square 1:1 aspect ratio',
+  '4:5':  'portrait 4:5 aspect ratio (Instagram feed)',
+  '9:16': 'vertical 9:16 aspect ratio (Stories/Reels)',
+  '16:9': 'landscape 16:9 aspect ratio',
+  '3:4':  'portrait 3:4 classic aspect ratio',
+}
+
 async function callGemini(
   prompt: string,
   imageParts: GeminiPart[],
-  _aspectRatio: AspectRatio
+  aspectRatio: AspectRatio
 ): Promise<{ base64: string; mimeType: string; tokensInput: number; tokensOutput: number }> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY não configurada')
+
+  const promptWithRatio = `${prompt} The final image MUST be in ${ASPECT_RATIO_LABELS[aspectRatio]}.`
 
   const body = {
     contents: [
       {
         parts: [
           ...imageParts,
-          { text: prompt },
+          { text: promptWithRatio },
         ],
       },
     ],
     generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
+      imageGenerationConfig: {
+        aspectRatio: ASPECT_RATIO_MAP[aspectRatio],
+      },
     },
   }
 
   const res = await fetch(`${API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body:    JSON.stringify(body),
   })
 
   if (!res.ok) {
