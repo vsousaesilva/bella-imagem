@@ -2,11 +2,10 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { formatDate } from '@/lib/utils'
 import type { GeneratedImage } from '@/lib/types'
-import Image from 'next/image'
-import { ImageIcon, Download, Plus } from 'lucide-react'
+import { ImageIcon, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { GaleriaCard } from '@/components/galeria-card'
 
 export default async function GaleriaPage() {
   const supabase = await createClient()
@@ -61,77 +60,9 @@ export default async function GaleriaPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {(images as GeneratedImage[]).map((img) => {
-            const displayUrl = img.selected_url ?? img.output_urls?.[0] ?? null
-            return (
-              <div
-                key={img.id}
-                className="group rounded-2xl overflow-hidden transition-all duration-300"
-                style={{
-                  background: 'var(--main-bg-subtle)',
-                  border: '1px solid var(--main-border)',
-                }}
-              >
-                <div className="aspect-[4/5] relative" style={{ background: 'var(--main-bg-subtle)' }}>
-                  {displayUrl ? (
-                    <Image
-                      src={displayUrl}
-                      alt="Imagem gerada"
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8" style={{ color: 'rgba(255,255,255,0.15)' }} />
-                    </div>
-                  )}
-
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3" style={{ background: 'rgba(0,0,0,0.5)' }}>
-                    {displayUrl && (
-                      <a
-                        href={displayUrl}
-                        download
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-lg transition-colors text-bella-white"
-                        style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
-                      >
-                        <Download className="w-4 h-4" />
-                      </a>
-                    )}
-                    {(img.output_urls?.length ?? 0) > 1 && (
-                      <span
-                        className="text-[10px] text-bella-white px-2 py-1 rounded-lg"
-                        style={{ background: 'rgba(0,0,0,0.5)' }}
-                      >
-                        {img.output_urls.length} variações
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-3">
-                  <p className="text-[11px] text-bella-gray">{formatDate(img.created_at)}</p>
-                  {img.caption_generated && (
-                    <p className="text-[11px] text-bella-gray-light mt-1 line-clamp-2">
-                      {img.caption_generated}
-                    </p>
-                  )}
-                  {img.instagram_permalink && (
-                    <a
-                      href={img.instagram_permalink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] text-bella-gold mt-1 block hover:text-bella-gold-light transition-colors"
-                    >
-                      Ver no Instagram
-                    </a>
-                  )}
-                </div>
-              </div>
-            )
-          })}
+          {(images as GeneratedImage[]).map((img) => (
+            <GaleriaCard key={img.id} img={img} />
+          ))}
         </div>
       )}
     </div>
