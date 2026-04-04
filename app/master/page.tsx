@@ -9,6 +9,7 @@ import { Building2, ImageIcon, Sparkles, TrendingUp } from 'lucide-react'
 export default async function MasterOverviewPage() {
   const admin = createAdminClient()
 
+  // Contagens usando count (não carrega dados)
   const { count: totalTenants } = await admin
     .from('tenants')
     .select('*', { count: 'exact', head: true })
@@ -19,10 +20,16 @@ export default async function MasterOverviewPage() {
     .select('*', { count: 'exact', head: true })
     .eq('status', 'completed')
 
+  // #10 — Custo total: agrega apenas o campo necessário
+  // Em escala, isso deveria ser uma materialized view ou cache
+  const periodStart = new Date()
+  periodStart.setFullYear(periodStart.getFullYear(), 0, 1) // inicio do ano
+  
   const { data: costData } = await admin
     .from('usage_logs')
     .select('cost_usd')
     .eq('success', true)
+    .gte('created_at', periodStart.toISOString())
 
   const totalCostUsd = costData?.reduce((sum, l) => sum + (l.cost_usd ?? 0), 0) ?? 0
 
@@ -36,9 +43,10 @@ export default async function MasterOverviewPage() {
     {} as Record<string, number>
   ) ?? {}
 
+  // Últimas atividades — limitado a 10
   const { data: recentLogs } = await admin
     .from('usage_logs')
-    .select('*, tenant:tenants(name)')
+    .select('id, action, cost_usd, duration_ms, created_at, tenant:tenants(name)')
     .eq('success', true)
     .order('created_at', { ascending: false })
     .limit(10)
@@ -51,9 +59,9 @@ export default async function MasterOverviewPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <KpiCard icon={<Building2   className="w-4 h-4 text-bella-gold" />} label="Empresas ativas"   value={(totalTenants ?? 0).toString()} />
-        <KpiCard icon={<ImageIcon   className="w-4 h-4 text-bella-rose" />} label="Imagens geradas"   value={(totalImages ?? 0).toString()} />
-        <KpiCard icon={<TrendingUp  className="w-4 h-4 text-green-400" />}  label="Custo total (BRL)" value={formatCostBrl(totalCostUsd)} />
+        <KpiCard icon={<Building2 className="w-4 h-4 text-bella-gold" />} label="Empresas ativas" value={(totalTenants ?? 0).toString()} />
+        <KpiCard icon={<ImageIcon className="w-4 h-4 text-bella-rose" />} label="Imagens geradas" value={(totalImages ?? 0).toString()} />
+        <KpiCard icon={<TrendingUp className="w-4 h-4 text-green-400" />} label="Custo total (BRL)" value={formatCostBrl(totalCostUsd)} />
       </div>
 
       {/* Planos */}
@@ -80,7 +88,7 @@ export default async function MasterOverviewPage() {
               <div className="flex items-center gap-3">
                 {log.action === 'generate_image'
                   ? <ImageIcon className="w-4 h-4 text-bella-gold" />
-                  : <Sparkles  className="w-4 h-4 text-bella-rose" />
+                  : <Sparkles className="w-4 h-4 text-bella-rose" />
                 }
                 <div>
                   <p className="text-sm text-bella-white">{(log.tenant as { name: string })?.name ?? '—'}</p>

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import {
-  validateWebhookToken,
   extractTenantId,
   planFromValue,
   type AsaasWebhookPayload,
 } from '@/lib/asaas'
+import { timingSafeCompare } from '@/lib/security/validation'
 import type { PlanType } from '@/lib/types'
 
 const QUOTA_MAP: Record<PlanType, number> = {
@@ -16,15 +16,28 @@ const QUOTA_MAP: Record<PlanType, number> = {
 }
 
 export async function POST(request: Request) {
-  // Valida token de segurança no header
+  // #4 — Validação timing-safe do token
   const token = request.headers.get('asaas-access-token')
-  if (!validateWebhookToken(token)) {
+  const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN
+
+  if (!expectedToken) {
+    console.error('[asaas-webhook] ASAAS_WEBHOOK_TOKEN não configurado')
+    return NextResponse.json({ error: 'Configuração interna inválida' }, { status: 500 })
+  }
+
+  if (!timingSafeCompare(token ?? '', expectedToken)) {
+    console.warn('[asaas-webhook] Token inválido recebido')
     return NextResponse.json({ error: 'Token inválido' }, { status: 401 })
   }
 
-  const payload: AsaasWebhookPayload = await request.json()
-  const admin = createAdminClient()
+  let payload: AsaasWebhookPayload
+  try {
+    payload = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
+  }
 
+  const admin = createAdminClient()
   const tenantId = extractTenantId(payload)
 
   // Registra o evento para auditoria
@@ -45,13 +58,11 @@ export async function POST(request: Request) {
         const plan = planFromValue(valueBrl)
         if (!plan || plan === 'free') break
 
-        // Atualiza plano do tenant
         await admin
           .from('tenants')
           .update({ plan, quota_limit: QUOTA_MAP[plan] })
           .eq('id', tenantId)
 
-        // Atualiza assinatura
         await admin
           .from('subscriptions')
           .update({
@@ -62,6 +73,7 @@ export async function POST(request: Request) {
           })
           .eq('tenant_id', tenantId)
 
+        console.log(`[asaas-webhook] Pagamento confirmado — tenant:${tenantId} plan:${plan}`)
         break
       }
 
@@ -73,13 +85,13 @@ export async function POST(request: Request) {
           .update({ status: 'overdue' })
           .eq('tenant_id', tenantId)
 
+        console.warn(`[asaas-webhook] Pagamento atrasado — tenant:${tenantId}`)
         break
       }
 
       case 'SUBSCRIPTION_CANCELLED': {
         if (!tenantId) break
 
-        // Downgrade para free
         await admin
           .from('tenants')
           .update({ plan: 'free', quota_limit: 15 })
@@ -94,6 +106,7 @@ export async function POST(request: Request) {
           })
           .eq('tenant_id', tenantId)
 
+        console.log(`[asaas-webhook] Assinatura cancelada — tenant:${tenantId}`)
         break
       }
 
@@ -114,22 +127,25 @@ export async function POST(request: Request) {
           })
           .eq('tenant_id', tenantId)
 
+        console.log(`[asaas-webhook] Assinatura criada — tenant:${tenantId} plan:${plan}`)
         break
       }
     }
 
     // Marca evento como processado
-    await admin
-      .from('payment_events')
-      .update({ processed: true })
-      .eq('asaas_event', payload.event)
-      .eq('tenant_id', tenantId)
-      .order('created_at', { ascending: false })
-      .limit(1)
+    if (tenantId) {
+      await admin
+        .from('payment_events')
+        .update({ processed: true })
+        .eq('asaas_event', payload.event)
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+    }
 
     return NextResponse.json({ received: true })
   } catch (err) {
-    console.error('Asaas webhook error:', err)
+    console.error('[asaas-webhook] Erro ao processar:', err)
     return NextResponse.json({ error: 'Erro ao processar evento' }, { status: 500 })
   }
 }

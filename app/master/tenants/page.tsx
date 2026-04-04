@@ -5,34 +5,55 @@ import { formatDate, formatCostBrl } from '@/lib/utils'
 import Link from 'next/link'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import type { Tenant } from '@/lib/types'
 import { Building2 } from 'lucide-react'
 
-export default async function TenantsPage() {
+const PAGE_SIZE = 50
+
+export default async function TenantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const params = await searchParams
+  const page = Math.max(1, parseInt(params.page ?? '1'))
+  const offset = (page - 1) * PAGE_SIZE
+
   const admin = createAdminClient()
 
-  const { data: tenants } = await admin
+  // #10 — Usa view otimizada em vez de N+1 queries separadas
+  const { data: tenants, count } = await admin
     .from('tenants')
-    .select('*')
+    .select('id, name, slug, plan, active, quota_used, quota_limit, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
+    .range(offset, offset + PAGE_SIZE - 1)
 
-  const { data: stats } = await admin
-    .from('usage_logs')
-    .select('tenant_id, action, cost_usd')
-    .eq('success', true)
+  // Busca stats agregados apenas para os tenants desta página
+  const tenantIds = tenants?.map((t) => t.id) ?? []
 
-  const tenantStats = (tenants as Tenant[] ?? []).map((t) => {
-    const logs = stats?.filter((l) => l.tenant_id === t.id) ?? []
-    const images = logs.filter((l) => l.action === 'generate_image').length
-    const cost = logs.reduce((s, l) => s + (l.cost_usd ?? 0), 0)
-    return { ...t, imagesTotal: images, costTotal: cost }
-  })
+  let tenantStats: Array<typeof tenants[0] & { imagesTotal: number; costTotal: number }> = []
+
+  if (tenantIds.length > 0) {
+    const { data: stats } = await admin
+      .from('usage_logs')
+      .select('tenant_id, action, cost_usd')
+      .in('tenant_id', tenantIds)
+      .eq('success', true)
+
+    tenantStats = (tenants ?? []).map((t) => {
+      const logs = stats?.filter((l) => l.tenant_id === t.id) ?? []
+      const images = logs.filter((l) => l.action === 'generate_image').length
+      const cost = logs.reduce((s, l) => s + (l.cost_usd ?? 0), 0)
+      return { ...t, imagesTotal: images, costTotal: cost }
+    })
+  }
+
+  const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE)
 
   return (
     <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Empresas</h1>
-        <p className="text-bella-gray text-sm mt-1">{tenants?.length ?? 0} empresas cadastradas.</p>
+        <p className="text-bella-gray text-sm mt-1">{count ?? 0} empresas cadastradas.</p>
       </div>
 
       <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
@@ -50,10 +71,7 @@ export default async function TenantsPage() {
           </thead>
           <tbody>
             {tenantStats.map((t) => (
-              <tr key={t.id} className="transition-colors" style={{ borderBottom: '1px solid var(--main-border)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--main-hover-bg)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
+              <tr key={t.id} className="transition-colors" style={{ borderBottom: '1px solid var(--main-border)' }}>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(201,169,110,0.1)' }}>
@@ -100,6 +118,27 @@ export default async function TenantsPage() {
           </div>
         )}
       </div>
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          {page > 1 && (
+            <Link href={`/master/tenants?page=${page - 1}`} className="text-sm text-bella-gold hover:text-bella-gold-light transition-colors px-3 py-1.5 rounded-lg"
+              style={{ border: '1px solid rgba(201,169,110,0.3)' }}>
+              Anterior
+            </Link>
+          )}
+          <span className="text-sm text-bella-gray">
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link href={`/master/tenants?page=${page + 1}`} className="text-sm text-bella-gold hover:text-bella-gold-light transition-colors px-3 py-1.5 rounded-lg"
+              style={{ border: '1px solid rgba(201,169,110,0.3)' }}>
+              Próxima
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   )
 }

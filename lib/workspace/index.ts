@@ -39,7 +39,6 @@ export async function getUserWorkspaces(userId: string): Promise<WorkspaceSummar
 export async function switchWorkspace(userId: string, tenantId: string): Promise<boolean> {
   const admin = createAdminClient()
 
-  // Verifica que o usuário é membro desse tenant
   const { data: membership } = await admin
     .from('tenant_memberships')
     .select('role')
@@ -78,7 +77,6 @@ export async function createTenant(
 ): Promise<{ success: boolean; tenantId?: string; error?: string }> {
   const admin = createAdminClient()
 
-  // Verifica slug único
   const { data: existing } = await admin
     .from('tenants')
     .select('id')
@@ -97,14 +95,12 @@ export async function createTenant(
     return { success: false, error: tenantError?.message ?? 'Erro ao criar tenant' }
   }
 
-  // Vincula o criador como administrador
   await admin.from('tenant_memberships').insert({
     user_id: userId,
     tenant_id: tenant.id,
     role: 'administrador',
   })
 
-  // Atualiza profile com o novo tenant
   await admin.from('profiles').update({
     tenant_id: tenant.id,
     role: 'administrador',
@@ -113,7 +109,56 @@ export async function createTenant(
   return { success: true, tenantId: tenant.id }
 }
 
-/** Verifica se o tenant tem cota disponível */
+// ──────────────────────────────────────────────────────────────
+// QUOTA — Versão atômica usando RPC do banco
+// ──────────────────────────────────────────────────────────────
+
+export interface QuotaResult {
+  allowed: boolean
+  used: number
+  limit: number
+  resetAt: string
+  error?: string
+}
+
+/**
+ * Verifica E incrementa a cota atomicamente.
+ * Usa SELECT ... FOR UPDATE no banco para evitar race conditions.
+ * Se permitido, a cota já foi incrementada — não chamar incrementQuota depois.
+ */
+export async function checkAndIncrementQuota(tenantId: string): Promise<QuotaResult> {
+  const admin = createAdminClient()
+
+  const { data, error } = await admin.rpc('check_and_increment_quota', {
+    p_tenant_id: tenantId,
+  })
+
+  if (error) {
+    console.error('[bella-imagem] quota RPC error:', error.message)
+    return { allowed: false, used: 0, limit: 0, resetAt: '', error: error.message }
+  }
+
+  const result = data as {
+    allowed: boolean
+    used?: number
+    limit?: number
+    reset_at?: string
+    error?: string
+  }
+
+  return {
+    allowed: result.allowed,
+    used: result.used ?? 0,
+    limit: result.limit ?? 0,
+    resetAt: result.reset_at ?? '',
+    error: result.error,
+  }
+}
+
+/**
+ * @deprecated Use checkAndIncrementQuota que é atômico.
+ * Mantido temporariamente para compatibilidade.
+ */
 export async function checkQuota(tenantId: string): Promise<{
   allowed: boolean
   used: number
@@ -130,7 +175,6 @@ export async function checkQuota(tenantId: string): Promise<{
 
   if (!tenant) return { allowed: false, used: 0, limit: 0, resetAt: '' }
 
-  // Reseta cota se necessário
   if (new Date(tenant.quota_reset_at) <= new Date()) {
     await admin
       .from('tenants')
@@ -155,7 +199,7 @@ export async function checkQuota(tenantId: string): Promise<{
   }
 }
 
-/** Incrementa o contador de uso após geração bem-sucedida */
+/** Incrementa o contador de uso (uso com checkAndIncrementQuota é desnecessário) */
 export async function incrementQuota(tenantId: string): Promise<void> {
   const admin = createAdminClient()
   await admin.rpc('increment_quota_used', { p_tenant_id: tenantId })

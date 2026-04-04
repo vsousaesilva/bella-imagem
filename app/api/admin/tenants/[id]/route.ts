@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 
-/** GET — retorna tenant + usuários para o painel master (bypassa RLS via admin client) */
+/** GET — retorna tenant + usuários para o painel master */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+
+  // Valida UUID
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    return NextResponse.json({ error: 'ID inválido.' }, { status: 400 })
+  }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -23,9 +29,10 @@ export async function GET(
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
   }
 
+  // #21 — Select apenas campos necessários (sem instagram_access_token etc.)
   const { data: tenant } = await admin
     .from('tenants')
-    .select('id, name, slug, plan, active, business_name, business_segment')
+    .select('id, name, slug, plan, active, business_name, business_segment, quota_used, quota_limit')
     .eq('id', id)
     .single()
 

@@ -26,14 +26,14 @@ export async function compressImage(
   quality = 0.85
 ): Promise<{ base64: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
-    const img = new Image()
+    const img = new globalThis.Image()
     const url = URL.createObjectURL(file)
     img.onload = () => {
       URL.revokeObjectURL(url)
       const ratio = Math.min(1, maxWidth / img.width)
       const canvas = document.createElement('canvas')
-      canvas.width = img.width * ratio
-      canvas.height = img.height * ratio
+      canvas.width = Math.round(img.width * ratio)
+      canvas.height = Math.round(img.height * ratio)
       const ctx = canvas.getContext('2d')!
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
       const dataUrl = canvas.toDataURL('image/jpeg', quality)
@@ -44,12 +44,19 @@ export async function compressImage(
   })
 }
 
-/** Taxa de conversão USD → BRL (atualizar conforme necessário) */
-const USD_TO_BRL = 5.75
+// #23 — Taxa de conversão USD → BRL configurável via variável de ambiente
+function getUsdToBrl(): number {
+  const envRate = typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_USD_TO_BRL : undefined
+  if (envRate) {
+    const parsed = parseFloat(envRate)
+    if (!isNaN(parsed) && parsed > 0) return parsed
+  }
+  return 5.75 // fallback
+}
 
 /** Converte USD para BRL */
 export function usdToBrl(usd: number): number {
-  return usd * USD_TO_BRL
+  return usd * getUsdToBrl()
 }
 
 /** Formata valor em BRL */

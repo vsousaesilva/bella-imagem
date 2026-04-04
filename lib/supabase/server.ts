@@ -27,11 +27,35 @@ export async function createClient() {
   )
 }
 
-/** Cliente admin — ignora RLS, apenas para operações server-side confiáveis */
+/**
+ * Cliente admin — ignora RLS, apenas para operações server-side confiáveis.
+ *
+ * #22 — Em escala, configurar o Supabase com connection pooler (PgBouncer)
+ * usando a connection string do pooler em vez da direta.
+ * No Supabase Dashboard: Project Settings > Database > Connection Pooling
+ *
+ * Para produção de alto tráfego, considere:
+ * - Usar a URL do pooler (porta 6543 em vez de 5432)
+ * - Configurar pool_mode = transaction
+ * - Monitorar conexões ativas no dashboard
+ */
 export function createAdminClient() {
   return createClientBase(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
+    {
+      auth: { autoRefreshToken: false, persistSession: false },
+      db: {
+        schema: 'public',
+      },
+      // Global fetch config para timeout
+      global: {
+        fetch: (url, init) =>
+          fetch(url, {
+            ...init,
+            signal: AbortSignal.timeout(30_000), // 30s timeout
+          }),
+      },
+    }
   )
 }

@@ -1,6 +1,5 @@
 // ============================================================
 // Bella Imagem — Geração de imagens via Gemini (Fase 1)
-// Migração futura: trocar o provider por fal.ai CatVTON/IDM-VTON
 // ============================================================
 
 import type {
@@ -9,17 +8,15 @@ import type {
   Tenant,
   AspectRatio,
 } from '@/lib/types'
+import { sanitizePromptInput } from '@/lib/security/validation'
 
 const GEMINI_MODEL = 'gemini-3.1-flash-image-preview'
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 
-// Custo aproximado Gemini 2.0 Flash (USD por 1k tokens)
 const COST_INPUT_PER_1K = 0.000075
 const COST_OUTPUT_PER_1K = 0.0003
 
-// ──────────────────────────────────────────────────────────────
-// Mapeamento de perfil do modelo → texto para o prompt
-// ──────────────────────────────────────────────────────────────
+// ── Mapeamento de perfil do modelo → texto ──
 
 function buildModelProfileText(tenant: Tenant): string {
   const labels = {
@@ -55,15 +52,15 @@ function buildModelProfileText(tenant: Tenant): string {
   ]
 
   if (tenant.model_descricao) {
-    parts.push(tenant.model_descricao)
+    // Sanitiza campo que vem do banco (foi salvo pelo admin, mas previne contra stored XSS)
+    const { sanitized } = sanitizePromptInput(tenant.model_descricao, 'model_descricao')
+    parts.push(sanitized)
   }
 
   return parts.join(', ')
 }
 
-// ──────────────────────────────────────────────────────────────
-// Mapeamento de fundo para texto descritivo
-// ──────────────────────────────────────────────────────────────
+// ── Mapeamento de fundo ──
 
 const BACKGROUND_DESCRIPTIONS: Record<string, string> = {
   studio_branco: 'fundo branco clean de estúdio fotográfico profissional',
@@ -77,31 +74,28 @@ const BACKGROUND_DESCRIPTIONS: Record<string, string> = {
 }
 
 function buildBackgroundText(preset?: string, custom?: string): string {
+  // Custom já foi sanitizado na rota antes de chegar aqui
   if (custom && custom.trim()) return custom.trim()
   if (preset && BACKGROUND_DESCRIPTIONS[preset]) return BACKGROUND_DESCRIPTIONS[preset]
   return 'fundo neutro e elegante que valorize a peça'
 }
 
-// ──────────────────────────────────────────────────────────────
-// Mapeamento de aspect ratio para Gemini
-// ──────────────────────────────────────────────────────────────
+// ── Aspect ratio ──
 
-const ASPECT_RATIO_MAP: Record<AspectRatio, string> = {
-  '1:1': '1:1',
-  '4:5': '4:5',
-  '9:16': '9:16',
-  '16:9': '16:9',
-  '3:4': '3:4',
+const ASPECT_RATIO_LABELS: Record<AspectRatio, string> = {
+  '1:1':  'perfectly square composition (1:1), centered framing, equal width and height',
+  '4:5':  'vertical portrait composition (4:5), taller than wide, standard Instagram feed format',
+  '9:16': 'tall vertical composition (9:16), full-body shot from head to feet, Stories/Reels format',
+  '16:9': 'wide horizontal landscape composition (16:9), wider than tall',
+  '3:4':  'vertical portrait composition (3:4), classic portrait format, taller than wide',
 }
 
-// ──────────────────────────────────────────────────────────────
-// Construção do prompt de try-on fashion
-// ──────────────────────────────────────────────────────────────
+// ── Tamanho ──
 
 function buildSizeText(tamanhoPeca?: string, tamanhoInfantil?: number): string {
   if (!tamanhoPeca) return ''
   if (tamanhoPeca === 'infanto_juvenil') {
-    const idade = tamanhoInfantil ?? 8
+    const idade = Math.min(16, Math.max(0, tamanhoInfantil ?? 8))
     return `The clothing is sized for a child aged ${idade} years old.`
   }
   const sizeMap: Record<string, string> = {
@@ -113,6 +107,8 @@ function buildSizeText(tamanhoPeca?: string, tamanhoInfantil?: number): string {
   }
   return `The clothing size is ${sizeMap[tamanhoPeca] ?? tamanhoPeca}.`
 }
+
+// ── Construção do prompt (#16 — inputs já sanitizados antes de chegar aqui) ──
 
 export function buildFashionPrompt(
   tenant: Tenant,
@@ -128,7 +124,7 @@ export function buildFashionPrompt(
     return [
       'Professional fashion photography for e-commerce.',
       'Using the provided person photo as the model, show them wearing the exact clothing/accessory from the product image.',
-      'Keep the model\'s face, body proportions and skin tone from the reference photo.',
+      "Keep the model's face, body proportions and skin tone from the reference photo.",
       'The clothing must match exactly the product provided.',
       sizeText,
       `Background: ${backgroundText}.`,
@@ -137,15 +133,13 @@ export function buildFashionPrompt(
     ].filter(Boolean).join(' ')
   }
 
-  // Sem foto de modelo: determina a descrição do modelo por prioridade
-  // 1. Orientação livre digitada na geração
-  // 2. Peça infanto-juvenil → modelo criança (perfil adulto do tenant seria contraditório)
-  // 3. Perfil padrão do tenant (configurações)
   let modelIntro: string
   if (modelDescricaoLivre && modelDescricaoLivre.trim()) {
-    modelIntro = `Create a model described as: "${modelDescricaoLivre.trim()}" wearing the exact clothing/accessory shown in the product image.`
+    // Input já sanitizado pela rota — aqui apenas encapsulamos de forma segura
+    const safeDesc = modelDescricaoLivre.trim().slice(0, 300)
+    modelIntro = `Create a model with these physical characteristics: ${safeDesc}. The model should wear the exact clothing/accessory shown in the product image.`
   } else if (tamanhoPeca === 'infanto_juvenil') {
-    const idade = tamanhoInfantil ?? 8
+    const idade = Math.min(16, Math.max(0, tamanhoInfantil ?? 8))
     modelIntro = `Show the exact clothing on an appropriate child model aged around ${idade} years old.`
   } else {
     const modelDesc = buildModelProfileText(tenant)
@@ -163,23 +157,11 @@ export function buildFashionPrompt(
   ].filter(Boolean).join(' ')
 }
 
-// ──────────────────────────────────────────────────────────────
-// Chamada à API Gemini
-// ──────────────────────────────────────────────────────────────
+// ── Chamada à API Gemini ──
 
 interface GeminiPart {
   text?: string
   inlineData?: { mimeType: string; data: string }
-}
-
-// Instruções de composição por proporção — guiam o enquadramento via prompt
-// pois o endpoint generateContent não aceita imageGenerationConfig.aspectRatio
-const ASPECT_RATIO_LABELS: Record<AspectRatio, string> = {
-  '1:1':  'perfectly square composition (1:1), centered framing, equal width and height',
-  '4:5':  'vertical portrait composition (4:5), taller than wide, standard Instagram feed format',
-  '9:16': 'tall vertical composition (9:16), full-body shot from head to feet, Stories/Reels format',
-  '16:9': 'wide horizontal landscape composition (16:9), wider than tall',
-  '3:4':  'vertical portrait composition (3:4), classic portrait format, taller than wide',
 }
 
 async function callGemini(
@@ -207,9 +189,9 @@ async function callGemini(
   }
 
   const res = await fetch(`${API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(body),
+    body: JSON.stringify(body),
   })
 
   if (!res.ok) {
@@ -222,7 +204,6 @@ async function callGemini(
 
   if (!candidate) throw new Error('Gemini não retornou candidatos')
 
-  // Extrai imagem do response
   const imagePart = candidate.content?.parts?.find(
     (p: GeminiPart) => p.inlineData?.mimeType?.startsWith('image/')
   )
@@ -240,9 +221,7 @@ async function callGemini(
   }
 }
 
-// ──────────────────────────────────────────────────────────────
-// Função principal — gera 2 variações
-// ──────────────────────────────────────────────────────────────
+// ── Função principal — gera 2 variações ──
 
 export async function generateFashionImages(
   req: GenerateImageRequest,
@@ -252,10 +231,12 @@ export async function generateFashionImages(
 
   const backgroundText = buildBackgroundText(req.backgroundPreset, req.backgroundCustom)
   const hasModelPhoto = !!(req.modelImageBase64 && req.modelImageMimeType)
-  const prompt = buildFashionPrompt(tenant, hasModelPhoto, backgroundText, req.tamanhoPeca, req.tamanhoInfantil, req.modelDescricaoLivre)
+  const prompt = buildFashionPrompt(
+    tenant, hasModelPhoto, backgroundText,
+    req.tamanhoPeca, req.tamanhoInfantil, req.modelDescricaoLivre
+  )
   const aspectRatio = req.aspectRatio ?? '4:5'
 
-  // Monta partes de imagem para o Gemini
   const imageParts: GeminiPart[] = [
     {
       inlineData: {

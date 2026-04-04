@@ -1,9 +1,9 @@
 // ============================================================
 // Bella Imagem — Integração Asaas (pagamentos e assinaturas)
-// Docs: https://docs.asaas.com
 // ============================================================
 
 import type { PlanType } from '@/lib/types'
+import { timingSafeCompare } from '@/lib/security/validation'
 
 const ASAAS_BASE_URL = process.env.ASAAS_ENV === 'sandbox'
   ? 'https://sandbox.asaas.com/api/v3'
@@ -28,9 +28,7 @@ async function asaasFetch(path: string, options?: RequestInit) {
   return res.json()
 }
 
-// ──────────────────────────────────────────────────────────────
-// Planos (valores em centavos)
-// ──────────────────────────────────────────────────────────────
+// ── Planos ──
 
 export const PLAN_PRICES_BRL: Record<PlanType, number> = {
   free: 0,
@@ -39,16 +37,14 @@ export const PLAN_PRICES_BRL: Record<PlanType, number> = {
   business: 1999.00,
 }
 
-// ──────────────────────────────────────────────────────────────
-// Customer (cliente Asaas)
-// ──────────────────────────────────────────────────────────────
+// ── Customer ──
 
 export interface AsaasCustomerInput {
   name: string
   email: string
   cpfCnpj?: string
   phone?: string
-  externalReference?: string  // tenant_id
+  externalReference?: string
 }
 
 export async function createCustomer(input: AsaasCustomerInput) {
@@ -62,18 +58,16 @@ export async function getCustomer(customerId: string) {
   return asaasFetch(`/customers/${customerId}`)
 }
 
-// ──────────────────────────────────────────────────────────────
-// Assinatura (subscription)
-// ──────────────────────────────────────────────────────────────
+// ── Assinatura ──
 
 export interface AsaasSubscriptionInput {
-  customer: string            // customerId
+  customer: string
   billingType: 'CREDIT_CARD' | 'BOLETO' | 'PIX'
-  value: number               // valor em BRL
-  nextDueDate: string         // 'YYYY-MM-DD'
+  value: number
+  nextDueDate: string
   cycle: 'MONTHLY'
   description: string
-  externalReference?: string  // tenant_id
+  externalReference?: string
 }
 
 export async function createSubscription(input: AsaasSubscriptionInput) {
@@ -84,28 +78,22 @@ export async function createSubscription(input: AsaasSubscriptionInput) {
 }
 
 export async function cancelSubscription(subscriptionId: string) {
-  return asaasFetch(`/subscriptions/${subscriptionId}`, {
-    method: 'DELETE',
-  })
+  return asaasFetch(`/subscriptions/${subscriptionId}`, { method: 'DELETE' })
 }
 
 export async function getSubscription(subscriptionId: string) {
   return asaasFetch(`/subscriptions/${subscriptionId}`)
 }
 
-// ──────────────────────────────────────────────────────────────
-// Validação de webhook
-// ──────────────────────────────────────────────────────────────
+// ── Validação de webhook (#4 — timing-safe) ──
 
 export function validateWebhookToken(token: string | null): boolean {
   const expected = process.env.ASAAS_WEBHOOK_TOKEN
-  if (!expected) return false
-  return token === expected
+  if (!expected || !token) return false
+  return timingSafeCompare(token, expected)
 }
 
-// ──────────────────────────────────────────────────────────────
-// Mapeamento de evento Asaas → ação no sistema
-// ──────────────────────────────────────────────────────────────
+// ── Tipos de evento ──
 
 export type AsaasEvent =
   | 'PAYMENT_CONFIRMED'
@@ -125,7 +113,7 @@ export interface AsaasWebhookPayload {
     value: number
     netValue: number
     status: string
-    externalReference?: string  // tenant_id
+    externalReference?: string
     dueDate: string
   }
   subscription?: {
@@ -140,7 +128,6 @@ export interface AsaasWebhookPayload {
   }
 }
 
-/** Extrai tenant_id do payload do webhook */
 export function extractTenantId(payload: AsaasWebhookPayload): string | null {
   return (
     payload.payment?.externalReference ??
@@ -149,7 +136,6 @@ export function extractTenantId(payload: AsaasWebhookPayload): string | null {
   )
 }
 
-/** Determina o plano com base no valor cobrado */
 export function planFromValue(valueBrl: number): PlanType | null {
   for (const [plan, price] of Object.entries(PLAN_PRICES_BRL)) {
     if (Math.abs(price - valueBrl) < 0.01) return plan as PlanType

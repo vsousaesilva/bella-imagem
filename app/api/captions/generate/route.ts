@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { generateCaption } from '@/lib/ai/captions'
+import { rateLimitCaption } from '@/lib/security/rate-limit'
+import { validateTextField } from '@/lib/security/validation'
 import type { Tenant } from '@/lib/types'
 
 export async function POST(request: Request) {
@@ -12,7 +14,7 @@ export async function POST(request: Request) {
 
   const { data: profile } = await admin
     .from('profiles')
-    .select('role, tenant_id')
+    .select('role, tenant_id, active')
     .eq('id', user.id)
     .single()
 
@@ -20,10 +22,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Tenant não configurado' }, { status: 400 })
   }
 
-  // Verifica se o plano suporta geração de legendas (starter+)
+  // #26 — Verifica se usuário está ativo
+  if (!profile.active) {
+    return NextResponse.json({ error: 'Conta desativada.' }, { status: 403 })
+  }
+
+  // Rate limiting
+  const rl = rateLimitCaption(profile.tenant_id)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Muitas requisições. Aguarde um momento.' },
+      { status: 429, headers: { 'Retry-After': Math.ceil((rl.resetAt - Date.now()) / 1000).toString() } }
+    )
+  }
+
+  // Carrega apenas campos necessários do tenant (#21)
   const { data: tenant } = await admin
     .from('tenants')
-    .select('*')
+    .select('id, plan, business_name, business_segment, business_description, business_tone')
     .eq('id', profile.tenant_id)
     .single()
 
@@ -36,34 +52,50 @@ export async function POST(request: Request) {
     )
   }
 
-  const { imageId, imageDescription } = await request.json()
+  let body: { imageId?: string; imageDescription?: string }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'JSON inválido.' }, { status: 400 })
+  }
+
+  // Validação de inputs
+  const descCheck = validateTextField(body.imageDescription, 'imageDescription', 500)
+  if (!descCheck.valid) {
+    return NextResponse.json({ error: descCheck.error }, { status: 400 })
+  }
+
+  if (body.imageId) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(body.imageId)) {
+      return NextResponse.json({ error: 'imageId inválido.' }, { status: 400 })
+    }
+  }
 
   const startTime = Date.now()
 
   try {
     const result = await generateCaption(
-      { imageDescription },
+      { imageDescription: descCheck.sanitized },
       tenant as Tenant
     )
 
     const durationMs = Date.now() - startTime
 
-    // Salva legenda na imagem se imageId fornecido
-    if (imageId) {
+    if (body.imageId) {
       await admin
         .from('generated_images')
         .update({ caption_generated: result.caption })
-        .eq('id', imageId)
+        .eq('id', body.imageId)
         .eq('tenant_id', profile.tenant_id)
     }
 
-    // Log de uso
     await admin.from('usage_logs').insert({
       tenant_id: profile.tenant_id,
       user_id: user.id,
-      image_id: imageId ?? null,
+      image_id: body.imageId ?? null,
       action: 'generate_caption',
-      ai_model: 'gemini-2.0-flash',
+      ai_model: 'gemini-2.5-flash',
       tokens_input: result.tokensInput,
       tokens_output: result.tokensOutput,
       cost_usd: result.costUsd,
@@ -80,7 +112,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       action: 'generate_caption',
       success: false,
-      error_message: message,
+      error_message: message.slice(0, 500),
     })
     return NextResponse.json({ error: 'Falha ao gerar legenda.', detail: message }, { status: 500 })
   }

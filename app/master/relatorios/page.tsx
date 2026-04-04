@@ -4,51 +4,57 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { formatCostBrl } from '@/lib/utils'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import type { Tenant } from '@/lib/types'
 
 export default async function RelatoriosPage() {
   const admin = createAdminClient()
 
   const now = new Date()
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const periodEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
 
+  // #10 — Consulta agregada no banco em vez de carregar todos os logs na memória
+  // Busca tenants ativos
   const { data: tenants } = await admin
     .from('tenants')
     .select('id, name, plan')
     .eq('active', true)
+    .order('name')
 
+  // Busca logs agregados por tenant (apenas do período)
   const { data: logs } = await admin
     .from('usage_logs')
-    .select('tenant_id, action, tokens_input, tokens_output, cost_usd, duration_ms, success')
+    .select('tenant_id, action, tokens_input, tokens_output, cost_usd, duration_ms')
     .gte('created_at', periodStart)
     .lte('created_at', periodEnd)
+    .eq('success', true)
 
-  const report = (tenants as Pick<Tenant, 'id' | 'name' | 'plan'>[] ?? []).map((t) => {
+  type TenantBasic = { id: string; name: string; plan: string }
+
+  const report = (tenants as TenantBasic[] ?? []).map((t) => {
     const tLogs = logs?.filter((l) => l.tenant_id === t.id) ?? []
-    const successLogs = tLogs.filter((l) => l.success)
+    const imgLogs = tLogs.filter((l) => l.action === 'generate_image')
     return {
-      tenant_id:            t.id,
-      tenant_name:          t.name,
-      plan:                 t.plan,
-      images_generated:     successLogs.filter((l) => l.action === 'generate_image').length,
-      captions_generated:   successLogs.filter((l) => l.action === 'generate_caption').length,
-      instagram_posts:      successLogs.filter((l) => l.action === 'post_instagram').length,
-      total_tokens_input:   successLogs.reduce((s, l) => s + (l.tokens_input ?? 0), 0),
-      total_tokens_output:  successLogs.reduce((s, l) => s + (l.tokens_output ?? 0), 0),
-      total_cost_usd:       successLogs.reduce((s, l) => s + (l.cost_usd ?? 0), 0),
-      avg_generation_time_ms: successLogs.length
-        ? successLogs.reduce((s, l) => s + (l.duration_ms ?? 0), 0) / successLogs.length
+      tenant_id: t.id,
+      tenant_name: t.name,
+      plan: t.plan,
+      images_generated: imgLogs.length,
+      captions_generated: tLogs.filter((l) => l.action === 'generate_caption').length,
+      instagram_posts: tLogs.filter((l) => l.action === 'post_instagram').length,
+      total_tokens_input: tLogs.reduce((s, l) => s + (l.tokens_input ?? 0), 0),
+      total_tokens_output: tLogs.reduce((s, l) => s + (l.tokens_output ?? 0), 0),
+      total_cost_usd: tLogs.reduce((s, l) => s + (l.cost_usd ?? 0), 0),
+      avg_generation_time_ms: imgLogs.length
+        ? imgLogs.reduce((s, l) => s + (l.duration_ms ?? 0), 0) / imgLogs.length
         : 0,
     }
   }).sort((a, b) => b.total_cost_usd - a.total_cost_usd)
 
   const grandTotal = {
-    images:    report.reduce((s, r) => s + r.images_generated, 0),
-    captions:  report.reduce((s, r) => s + r.captions_generated, 0),
-    tokensIn:  report.reduce((s, r) => s + r.total_tokens_input, 0),
+    images: report.reduce((s, r) => s + r.images_generated, 0),
+    captions: report.reduce((s, r) => s + r.captions_generated, 0),
+    tokensIn: report.reduce((s, r) => s + r.total_tokens_input, 0),
     tokensOut: report.reduce((s, r) => s + r.total_tokens_output, 0),
-    cost:      report.reduce((s, r) => s + r.total_cost_usd, 0),
+    cost: report.reduce((s, r) => s + r.total_cost_usd, 0),
   }
 
   return (
@@ -64,11 +70,11 @@ export default async function RelatoriosPage() {
       {/* Totais globais */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
         {[
-          { label: 'Imagens',        value: grandTotal.images.toString() },
-          { label: 'Legendas',       value: grandTotal.captions.toString() },
+          { label: 'Imagens', value: grandTotal.images.toString() },
+          { label: 'Legendas', value: grandTotal.captions.toString() },
           { label: 'Tokens entrada', value: grandTotal.tokensIn.toLocaleString() },
-          { label: 'Tokens saída',   value: grandTotal.tokensOut.toLocaleString() },
-          { label: 'Custo total',    value: formatCostBrl(grandTotal.cost) },
+          { label: 'Tokens saída', value: grandTotal.tokensOut.toLocaleString() },
+          { label: 'Custo total', value: formatCostBrl(grandTotal.cost) },
         ].map((item) => (
           <div key={item.label} className="rounded-2xl p-4" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
             <p className="text-[10px] text-bella-gray tracking-wide uppercase mb-1">{item.label}</p>

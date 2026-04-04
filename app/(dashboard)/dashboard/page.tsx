@@ -16,9 +16,10 @@ export default async function DashboardPage() {
 
   const admin = createAdminClient()
 
+  // #21 — Select apenas campos necessários
   const { data: profile } = await admin
     .from('profiles')
-    .select('*, tenant:tenants(*)')
+    .select('full_name, role, tenant_id, active, tenant:tenants(id, name, plan, quota_used, quota_limit, quota_reset_at)')
     .eq('id', user.id)
     .single()
 
@@ -34,9 +35,10 @@ export default async function DashboardPage() {
   const tenant = profile.tenant as Tenant
   const isMaster = profile.role === 'master'
 
+  // Imagens recentes — select apenas campos necessários
   const { data: recentImages } = await admin
     .from('generated_images')
-    .select('*')
+    .select('id, selected_url, output_urls, created_at')
     .eq('tenant_id', tenant.id)
     .eq('status', 'completed')
     .order('created_at', { ascending: false })
@@ -46,6 +48,7 @@ export default async function DashboardPage() {
   periodStart.setDate(1)
   periodStart.setHours(0, 0, 0, 0)
 
+  // Logs do mês — select apenas campos necessários
   const { data: monthStats } = await admin
     .from('usage_logs')
     .select('action, cost_usd, duration_ms')
@@ -76,9 +79,9 @@ export default async function DashboardPage() {
         'grid gap-4 mb-8',
         isMaster ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'
       )}>
-        <StatCard icon={<ImageIcon className="w-4 h-4 text-bella-gold" />}  label="Imagens geradas"  value={imagesThisMonth.toString()}  sub="este mês" />
-        <StatCard icon={<Sparkles   className="w-4 h-4 text-bella-rose" />} label="Legendas geradas" value={captionsThisMonth.toString()} sub="este mês" />
-        <StatCard icon={<Clock      className="w-4 h-4 text-amber-400" />}  label="Tempo médio"      value={avgTimeMs > 0 ? `${(avgTimeMs / 1000).toFixed(1)}s` : '—'} sub="por geração" />
+        <StatCard icon={<ImageIcon className="w-4 h-4 text-bella-gold" />} label="Imagens geradas" value={imagesThisMonth.toString()} sub="este mês" />
+        <StatCard icon={<Sparkles className="w-4 h-4 text-bella-rose" />} label="Legendas geradas" value={captionsThisMonth.toString()} sub="este mês" />
+        <StatCard icon={<Clock className="w-4 h-4 text-amber-400" />} label="Tempo médio" value={avgTimeMs > 0 ? `${(avgTimeMs / 1000).toFixed(1)}s` : '—'} sub="por geração" />
         {isMaster && (
           <StatCard icon={<TrendingUp className="w-4 h-4 text-green-400" />} label="Custo total" value={formatCostBrl(totalCostUsd)} sub="este mês" />
         )}
@@ -142,7 +145,7 @@ export default async function DashboardPage() {
                       alt="Imagem gerada"
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      unoptimized
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
                     />
                   )}
                 </a>

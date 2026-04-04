@@ -8,7 +8,6 @@ import type { GeneratedImage } from '@/lib/types'
 
 export function GaleriaCard({ img }: { img: GeneratedImage }) {
   const displayUrl = img.selected_url ?? img.output_urls?.[0] ?? null
-  const variationsCount = img.output_urls?.length ?? 0
 
   const [downloading, setDownloading] = useState(false)
   const [captionOpen, setCaptionOpen] = useState(false)
@@ -44,7 +43,7 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
         className="group rounded-2xl overflow-hidden transition-all duration-300"
         style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
       >
-        {/* Imagem */}
+        {/* #8 — Imagem com sizes e sem unoptimized */}
         <div className="aspect-[4/5] relative" style={{ background: 'var(--main-bg-subtle)' }}>
           {displayUrl ? (
             <Image
@@ -52,7 +51,7 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
               alt="Imagem gerada"
               fill
               className="object-cover"
-              unoptimized
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -65,7 +64,6 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3"
             style={{ background: 'rgba(0,0,0,0.55)' }}
           >
-            {/* Botão download */}
             {displayUrl && (
               <button
                 onClick={handleDownload}
@@ -78,7 +76,6 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
                 {downloading ? 'Baixando...' : 'Baixar'}
               </button>
             )}
-
           </div>
         </div>
 
@@ -122,7 +119,6 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
             style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header do modal */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-medium text-sm" style={{ color: '#fefefe' }}>Legenda gerada</h3>
               <button
@@ -134,14 +130,12 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
               </button>
             </div>
 
-            {/* Texto da legenda */}
             <div className="flex-1 overflow-y-auto mb-4">
               <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: '#b0b0b0' }}>
                 {img.caption_generated}
               </p>
             </div>
 
-            {/* Botão copiar */}
             <button
               onClick={handleCopy}
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium transition-all"
