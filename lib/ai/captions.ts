@@ -4,7 +4,7 @@
 
 import type { Tenant } from '@/lib/types'
 
-const GEMINI_TEXT_MODEL = 'gemini-2.0-flash'
+const GEMINI_TEXT_MODEL = 'gemini-2.5-flash'
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 const COST_INPUT_PER_1K = 0.000075
