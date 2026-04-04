@@ -110,7 +110,7 @@ export default function GerarImagemPage() {
       body: JSON.stringify({ imageId: result.imageId }),
     })
     const data = await res.json()
-    if (!res.ok) setCaptionError(data.error ?? 'Erro ao gerar legenda.')
+    if (!res.ok) setCaptionError(data.detail ?? data.error ?? 'Erro ao gerar legenda.')
     else setCaptionText(data.caption ?? null)
     setGeneratingCaption(false)
   }
