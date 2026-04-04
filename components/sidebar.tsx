@@ -75,7 +75,7 @@ export function Sidebar({ profile, tenant, mobileOpen = false, onMobileClose }: 
               alt="Bella Imagem"
               width={120}
               height={36}
-              className="object-contain"
+              className="object-contain object-left"
               style={{ maxHeight: 36 }}
               priority
             />
