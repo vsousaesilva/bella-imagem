@@ -32,7 +32,7 @@ export default async function DashboardPage() {
     )
   }
 
-  const tenant = profile.tenant as Tenant
+  const tenant = profile.tenant as unknown as Tenant
   const isMaster = profile.role === 'master'
 
   // Imagens recentes — select apenas campos necessários
