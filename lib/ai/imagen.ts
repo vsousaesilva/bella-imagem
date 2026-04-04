@@ -172,12 +172,14 @@ interface GeminiPart {
   inlineData?: { mimeType: string; data: string }
 }
 
+// Instruções de composição por proporção — guiam o enquadramento via prompt
+// pois o endpoint generateContent não aceita imageGenerationConfig.aspectRatio
 const ASPECT_RATIO_LABELS: Record<AspectRatio, string> = {
-  '1:1':  'square 1:1 aspect ratio',
-  '4:5':  'portrait 4:5 aspect ratio (Instagram feed)',
-  '9:16': 'vertical 9:16 aspect ratio (Stories/Reels)',
-  '16:9': 'landscape 16:9 aspect ratio',
-  '3:4':  'portrait 3:4 classic aspect ratio',
+  '1:1':  'perfectly square composition (1:1), centered framing, equal width and height',
+  '4:5':  'vertical portrait composition (4:5), taller than wide, standard Instagram feed format',
+  '9:16': 'tall vertical composition (9:16), full-body shot from head to feet, Stories/Reels format',
+  '16:9': 'wide horizontal landscape composition (16:9), wider than tall',
+  '3:4':  'vertical portrait composition (3:4), classic portrait format, taller than wide',
 }
 
 async function callGemini(
@@ -188,7 +190,7 @@ async function callGemini(
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY não configurada')
 
-  const promptWithRatio = `${prompt} The final image MUST be in ${ASPECT_RATIO_LABELS[aspectRatio]}.`
+  const promptWithRatio = `${prompt} IMPORTANT: The image MUST use a ${ASPECT_RATIO_LABELS[aspectRatio]}. Crop and frame accordingly.`
 
   const body = {
     contents: [
@@ -201,9 +203,6 @@ async function callGemini(
     ],
     generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
-      imageGenerationConfig: {
-        aspectRatio: ASPECT_RATIO_MAP[aspectRatio],
-      },
     },
   }
 
