@@ -76,7 +76,7 @@ Crie uma legenda de ${platform} para esse post de moda.`
     ],
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 512,
+      maxOutputTokens: 1024,
     },
   }
 
