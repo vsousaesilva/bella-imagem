@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { formatDate, formatCostBrl } from '@/lib/utils'
 import Link from 'next/link'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
+import type { PlanType } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Building2 } from 'lucide-react'
 
@@ -87,8 +88,8 @@ export default async function TenantsPage({
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[t.plan])}>
-                    {PLAN_LABELS[t.plan]}
+                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide', PLAN_COLORS[t.plan as PlanType])}>
+                    {PLAN_LABELS[t.plan as PlanType]}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
