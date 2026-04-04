@@ -261,17 +261,14 @@ export async function POST(request: Request) {
       .eq('id', imageRecord.id)
 
     // Reverte a cota (a geração falhou)
-    await admin.rpc('increment_quota_used', { p_tenant_id: profile.tenant_id })
-      .then(() => {
-        // Decrementa de volta (idealmente teria uma função dedicada)
-        return admin
-          .from('tenants')
-          .update({ quota_used: quota.used - 1 })
-          .eq('id', profile.tenant_id)
-      })
-      .catch((revertErr) => {
-        console.error('[bella-imagem] falha ao reverter cota:', revertErr)
-      })
+    try {
+      await admin
+        .from('tenants')
+        .update({ quota_used: quota.used - 1 })
+        .eq('id', profile.tenant_id)
+    } catch (revertErr) {
+      console.error('[bella-imagem] falha ao reverter cota:', revertErr)
+    }
 
     await admin.from('usage_logs').insert({
       tenant_id: profile.tenant_id,
