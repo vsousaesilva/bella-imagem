@@ -91,7 +91,7 @@ export default async function MasterOverviewPage() {
                   : <Sparkles className="w-4 h-4 text-bella-rose" />
                 }
                 <div>
-                  <p className="text-sm text-bella-white">{(log.tenant as { name: string })?.name ?? '—'}</p>
+                  <p className="text-sm text-bella-white">{(log.tenant as unknown as { name: string })?.name ?? '—'}</p>
                   <p className="text-[11px] text-bella-gray">
                     {log.action === 'generate_image' ? 'Geração de imagem' : 'Geração de legenda'}
                   </p>
