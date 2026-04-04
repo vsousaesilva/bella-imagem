@@ -392,7 +392,7 @@ function ResultState({ result, selectedVariation, onSelectVariation, captionText
             <CheckCircle2 className="w-5 h-5 text-green-400" />
             <h1 className="text-xl font-display font-medium text-bella-white">Imagens geradas!</h1>
           </div>
-          <p className="text-bella-gray text-sm">Selecione a variação que preferir.</p>
+          <p className="text-bella-gray text-sm">Toque na imagem que quiser guardar. A outra será descartada.</p>
         </div>
         <button onClick={onNewGeneration} className="text-sm text-bella-gold hover:text-bella-gold-light transition-colors">
           Nova geração

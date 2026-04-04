@@ -79,15 +79,6 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
               </button>
             )}
 
-            {/* Variações */}
-            {variationsCount > 1 && (
-              <span
-                className="text-[10px] font-medium px-2 py-1 rounded-lg"
-                style={{ background: 'rgba(0,0,0,0.7)', color: '#fefefe', border: '1px solid rgba(255,255,255,0.15)' }}
-              >
-                {variationsCount} variações
-              </span>
-            )}
           </div>
         </div>
 
