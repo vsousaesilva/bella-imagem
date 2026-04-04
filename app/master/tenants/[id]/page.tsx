@@ -98,7 +98,7 @@ export default function EditTenantPage() {
 
   if (loading) {
     return (
-      <div className="p-8 max-w-3xl mx-auto">
+      <div className="p-4 sm:p-8 max-w-3xl mx-auto">
         <div className="h-6 w-32 rounded-xl shimmer mb-8" />
         <div className="h-10 w-64 rounded-xl shimmer mb-4" />
         <div className="rounded-2xl p-6 h-48 shimmer" />
@@ -115,7 +115,7 @@ export default function EditTenantPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-3xl mx-auto">
       <button
         onClick={() => router.push('/master/tenants')}
         className="flex items-center gap-2 text-sm text-bella-gray hover:text-bella-gold mb-6 transition-colors"

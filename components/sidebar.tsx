@@ -15,11 +15,14 @@ import {
   LogOut,
   ShieldCheck,
   Sparkles,
+  X,
 } from 'lucide-react'
 
 interface SidebarProps {
   profile: Profile
   tenant: Tenant | null
+  mobileOpen?: boolean
+  onMobileClose?: () => void
 }
 
 const NAV_ITEMS = [
@@ -29,7 +32,7 @@ const NAV_ITEMS = [
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
-export function Sidebar({ profile, tenant }: SidebarProps) {
+export function Sidebar({ profile, tenant, mobileOpen = false, onMobileClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -44,7 +47,30 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
     : 0
 
   return (
-    <aside className="sidebar-dark w-60 flex-shrink-0 flex flex-col min-h-screen">
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/60"
+          onClick={onMobileClose}
+        />
+      )}
+    <aside className={cn(
+      'sidebar-dark flex-shrink-0 flex flex-col h-screen overflow-y-auto',
+      'fixed inset-y-0 left-0 z-50 w-72',
+      'transform transition-transform duration-300 ease-in-out',
+      mobileOpen ? 'translate-x-0' : '-translate-x-full',
+      'md:relative md:inset-auto md:z-auto md:w-60 md:translate-x-0 md:min-h-screen md:h-auto md:overflow-visible'
+    )}>
+      {/* Close button — mobile only */}
+      <button
+        className="md:hidden absolute top-4 right-4 text-bella-gray hover:text-bella-white transition-colors z-10"
+        onClick={onMobileClose}
+        aria-label="Fechar menu"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
       {/* Logo */}
       <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <Image
@@ -69,6 +95,7 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
             <Link
               key={href}
               href={href}
+              onClick={onMobileClose}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
                 active
@@ -89,6 +116,7 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
         {profile.role === 'master' && (
           <Link
             href="/master"
+            onClick={onMobileClose}
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
               pathname.startsWith('/master')
@@ -162,5 +190,6 @@ export function Sidebar({ profile, tenant }: SidebarProps) {
         <ThemeToggle />
       </div>
     </aside>
+    </>
   )
 }

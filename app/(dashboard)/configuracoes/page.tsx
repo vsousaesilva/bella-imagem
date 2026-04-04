@@ -118,7 +118,7 @@ export default function ConfiguracoesPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="h-8 w-48 rounded-xl shimmer mb-2" />
         <div className="h-4 w-72 rounded-xl shimmer" />
       </div>
@@ -126,7 +126,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Configurações</h1>
         <p className="text-bella-gray text-sm mt-1">Configure o contexto da sua marca e o perfil padrão do modelo.</p>

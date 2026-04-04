@@ -44,7 +44,7 @@ export default async function MasterOverviewPage() {
     .limit(10)
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Visão Geral</h1>
         <p className="text-bella-gray text-sm mt-1">Métricas consolidadas de todas as empresas.</p>

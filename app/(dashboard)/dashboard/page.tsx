@@ -63,7 +63,7 @@ export default async function DashboardPage() {
   const percent = quotaPercent(tenant.quota_used, tenant.quota_limit)
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">
           Olá, {profile.full_name?.split(' ')[0] ?? 'Bem-vindo(a)'}!

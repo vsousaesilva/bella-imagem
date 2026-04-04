@@ -36,8 +36,8 @@ export default async function GaleriaPage() {
   if (error) console.error('[galeria] erro ao buscar imagens:', error.message)
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Galeria</h1>
           <p className="text-bella-gray text-sm mt-1">Todas as imagens geradas pela sua conta.</p>

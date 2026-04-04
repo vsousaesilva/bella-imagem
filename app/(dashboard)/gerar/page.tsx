@@ -141,7 +141,7 @@ export default function GerarImagemPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-display font-medium text-bella-white tracking-tight">Gerar Imagem</h1>
         <p className="text-bella-gray text-sm mt-1">Envie a peça ou acessório e gere uma foto profissional com modelo.</p>
@@ -356,7 +356,7 @@ function ImageUploadBox({ preview, placeholder, onClick, onRemove, compact = fal
 
 function GeneratingState() {
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-4xl mx-auto">
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 animate-pulse"
@@ -385,8 +385,8 @@ function ResultState({ result, selectedVariation, onSelectVariation, captionText
   onGenerateCaption: () => void; onNewGeneration: () => void
 }) {
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle2 className="w-5 h-5 text-green-400" />
