@@ -43,7 +43,8 @@ function buildBusinessContext(tenant: Tenant): string {
 
 export interface CaptionRequest {
   imageDescription?: string
-  imageContext?: string   // prompt_used + metadados da imagem gerada
+  imageContext?: string    // metadados complementares (cenário, formato)
+  imageBase64?: string     // imagem gerada em base64 para visão do modelo
   platform?: string
 }
 
@@ -97,13 +98,16 @@ ${safeDescription ? `\nObservações adicionais: ${safeDescription}` : ''}
 
 Gere a legenda completa para o post de ${platform}.`
 
+  // Inclui a imagem gerada quando disponível — o modelo de visão identifica
+  // a peça exata (vestido de noiva, camiseta, etc.) sem precisar de descrição manual.
+  const userParts: { text?: string; inlineData?: { mimeType: string; data: string } }[] = []
+  if (req.imageBase64) {
+    userParts.push({ inlineData: { mimeType: 'image/jpeg', data: req.imageBase64 } })
+  }
+  userParts.push({ text: `${systemPrompt}\n\n${userPrompt}` })
+
   const body = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
-      },
-    ],
+    contents: [{ role: 'user', parts: userParts }],
     generationConfig: {
       temperature: 0.9,
       maxOutputTokens: 2048,
