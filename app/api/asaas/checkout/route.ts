@@ -26,7 +26,7 @@ const PLAN_LABELS: Record<PlanType, string> = {
   business: 'Business',
 }
 
-const APP_URL = 'https://bellaimagem.ai.br'
+const APP_URL = 'https://bellaimagem.ia.br'
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>

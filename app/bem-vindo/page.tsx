@@ -139,10 +139,10 @@ export default async function BemVindoPage({ searchParams }: PageProps) {
               <p className="text-bella-gray text-sm font-body mt-1 leading-relaxed">
                 Após criar sua senha, acesse{' '}
                 <a
-                  href="https://bellaimagem.ai.br/login"
+                  href="https://bellaimagem.ia.br/login"
                   className="text-bella-gold hover:underline"
                 >
-                  bellaimagem.ai.br
+                  bellaimagem.ia.br
                 </a>{' '}
                 e comece a gerar fotos profissionais para sua loja.
               </p>
@@ -152,7 +152,7 @@ export default async function BemVindoPage({ searchParams }: PageProps) {
 
         {/* CTA login */}
         <a
-          href="https://bellaimagem.ai.br/login"
+          href="https://bellaimagem.ia.br/login"
           className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm tracking-widest uppercase"
         >
           <span>Ir para o login</span>
@@ -161,8 +161,8 @@ export default async function BemVindoPage({ searchParams }: PageProps) {
 
         <p className="text-[11px] text-bella-gray mt-8">
           Dúvidas? Fale conosco em{' '}
-          <a href="mailto:suporte@bellaimagem.ai.br" className="text-bella-gold hover:underline">
-            suporte@bellaimagem.ai.br
+          <a href="mailto:suporte@bellaimagem.ia.br" className="text-bella-gold hover:underline">
+            suporte@bellaimagem.ia.br
           </a>
         </p>
       </div>

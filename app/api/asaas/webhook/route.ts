@@ -182,7 +182,7 @@ async function sendPasswordSetupEmail(
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
     await anon.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://bellaimagem.ai.br/auth/callback?next=/dashboard',
+      redirectTo: 'https://bellaimagem.ia.br/auth/callback?next=/dashboard',
     })
 
     console.log(`[asaas-webhook] E-mail de senha enviado para tenant:${tenantId}`)
