@@ -105,10 +105,9 @@ export async function POST(request: Request) {
       .single()
 
     if (!profile?.tenant_id) {
-      return NextResponse.json(
-        { error: 'Conta encontrada mas sem tenant associado. Entre em contato com o suporte.' },
-        { status: 409 }
-      )
+      // Usuário órfão (tenant foi excluído mas auth não) — remove e recria como novo cadastro
+      await admin.auth.admin.deleteUser(existingUser.id)
+      return await createNewAccount({ admin, plan: typedPlan, name: nameCheck.sanitized, email, cpfCnpj, phone, isSandbox })
     }
 
     const { data: sub } = await admin
@@ -145,68 +144,98 @@ export async function POST(request: Request) {
     })
   }
 
-  const userId = newUser.user.id
+  return await createNewAccount({ admin, plan: typedPlan, name: nameCheck.sanitized, email, cpfCnpj, phone, isSandbox, existingUserId: newUser.user.id })
+}
 
-  // Criar tenant (slug único com sufixo do userId)
-  const baseSlug = toSlug(nameCheck.sanitized) || 'loja'
-  const slug = `${baseSlug}-${userId.slice(0, 6)}`
+// ── Cria tenant + usuário + assinatura do zero ──
 
+async function createNewAccount({
+  admin,
+  plan,
+  name,
+  email,
+  cpfCnpj,
+  phone,
+  isSandbox,
+  existingUserId,
+}: {
+  admin: ReturnType<typeof createAdminClient>
+  plan: PlanType
+  name: string
+  email: string
+  cpfCnpj?: string
+  phone?: string
+  isSandbox: boolean
+  existingUserId?: string
+}): Promise<NextResponse> {
+  // Se não veio um userId existente, cria o usuário agora
+  let userId = existingUserId
+  if (!userId) {
+    const { data: newUser, error: userError } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { full_name: name },
+    })
+    if (userError || !newUser?.user) {
+      console.error('[checkout] Erro ao criar usuário:', userError)
+      return NextResponse.json(
+        { error: 'Erro ao criar conta. Tente novamente.', detail: isSandbox ? userError?.message : undefined },
+        { status: 500 }
+      )
+    }
+    userId = newUser.user.id
+  }
+
+  // Criar tenant
+  const slug = toSlug(name)
   const { data: tenant, error: tenantError } = await admin
     .from('tenants')
     .insert({
-      name: nameCheck.sanitized,
+      name,
       slug,
-      plan: typedPlan,
-      quota_limit: QUOTA_MAP[typedPlan],
+      plan,
+      active: true,
+      quota_limit: QUOTA_MAP[plan],
+      quota_used: 0,
     })
     .select('id')
     .single()
 
   if (tenantError || !tenant) {
-    await admin.auth.admin.deleteUser(userId)
     console.error('[checkout] Erro ao criar tenant:', tenantError)
+    await admin.auth.admin.deleteUser(userId)
     return NextResponse.json(
-      { error: 'Erro ao criar conta.', detail: isSandbox ? tenantError?.message : undefined },
+      { error: 'Erro ao criar conta. Tente novamente.', detail: isSandbox ? tenantError?.message : undefined },
       { status: 500 }
     )
   }
 
   const tenantId = tenant.id
 
-  // Criar perfil e membership
-  const [profileResult, membershipResult] = await Promise.all([
-    admin.from('profiles').upsert({
-      id: userId,
-      tenant_id: tenantId,
-      full_name: nameCheck.sanitized,
-      role: 'administrador',
-      active: true,
-    }),
-    admin.from('tenant_memberships').insert({
-      user_id: userId,
-      tenant_id: tenantId,
-      role: 'administrador',
-    }),
-  ])
-  if (profileResult.error) console.error('[checkout] Erro ao criar profile:', profileResult.error)
-  if (membershipResult.error) console.error('[checkout] Erro ao criar membership:', membershipResult.error)
+  // Criar profile + membership
+  await admin.from('profiles').insert({
+    id: userId,
+    tenant_id: tenantId,
+    full_name: name,
+    role: 'administrador',
+    active: true,
+  })
 
-  // Plano gratuito: não precisa de pagamento — envia e-mail de definição de senha
-  if (typedPlan === 'free') {
-    await sendPasswordSetupEmail(email, nameCheck.sanitized, admin)
+  await admin.from('subscriptions').insert({
+    tenant_id: tenantId,
+    plan,
+    status: 'pending',
+    billing_cycle: 'MONTHLY',
+  })
+
+  // Plano gratuito: enviar e-mail de senha e redirecionar
+  if (plan === 'free') {
+    await sendPasswordSetupEmail(email, name, admin)
     return NextResponse.json({ checkoutUrl: `${APP_URL}/bem-vindo?plan=free` })
   }
 
-  return await gerarLinkPagamento({
-    admin,
-    tenantId,
-    typedPlan,
-    name: nameCheck.sanitized,
-    email,
-    cpfCnpj,
-    phone,
-    isSandbox,
-  })
+  // Planos pagos: gerar link de pagamento no Asaas
+  return await gerarLinkPagamento({ admin, tenantId, typedPlan: plan, name, email, cpfCnpj, phone, isSandbox })
 }
 
 // ── Gera customer + subscription no Asaas e retorna invoiceUrl ──
