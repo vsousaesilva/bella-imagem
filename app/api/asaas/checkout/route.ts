@@ -61,7 +61,17 @@ export async function POST(request: Request) {
   if (!nameCheck.valid) return NextResponse.json({ error: nameCheck.error }, { status: 400 })
 
   const typedPlan = plan as PlanType
-  const admin = createAdminClient()
+  const isSandbox = process.env.ASAAS_ENV === 'sandbox'
+  let admin: ReturnType<typeof createAdminClient>
+  try {
+    admin = createAdminClient()
+  } catch (err) {
+    console.error('[checkout] Falha ao inicializar Supabase admin:', err)
+    return NextResponse.json(
+      { error: 'Erro de configuração do servidor.', detail: isSandbox ? String(err) : undefined },
+      { status: 500 }
+    )
+  }
 
   // Criar usuário Supabase sem senha — receberá e-mail para definir senha após pagamento
   const { data: newUser, error: userError } = await admin.auth.admin.createUser({
@@ -71,7 +81,6 @@ export async function POST(request: Request) {
   })
 
   if (userError) {
-    // E-mail já cadastrado
     if (userError.message?.includes('already')) {
       return NextResponse.json(
         { error: 'E-mail já cadastrado. Acesse a plataforma pelo link de login.' },
@@ -79,7 +88,10 @@ export async function POST(request: Request) {
       )
     }
     console.error('[checkout] Erro ao criar usuário:', userError)
-    return NextResponse.json({ error: 'Erro ao criar conta. Tente novamente.' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro ao criar conta. Tente novamente.', detail: isSandbox ? userError.message : undefined },
+      { status: 500 }
+    )
   }
 
   const userId = newUser.user.id
@@ -102,13 +114,16 @@ export async function POST(request: Request) {
   if (tenantError || !tenant) {
     await admin.auth.admin.deleteUser(userId)
     console.error('[checkout] Erro ao criar tenant:', tenantError)
-    return NextResponse.json({ error: 'Erro ao criar conta.' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro ao criar conta.', detail: isSandbox ? tenantError?.message : undefined },
+      { status: 500 }
+    )
   }
 
   const tenantId = tenant.id
 
   // Criar perfil e membership
-  await Promise.all([
+  const [profileResult, membershipResult] = await Promise.all([
     admin.from('profiles').upsert({
       id: userId,
       tenant_id: tenantId,
@@ -122,6 +137,8 @@ export async function POST(request: Request) {
       role: 'administrador',
     }),
   ])
+  if (profileResult.error) console.error('[checkout] Erro ao criar profile:', profileResult.error)
+  if (membershipResult.error) console.error('[checkout] Erro ao criar membership:', membershipResult.error)
 
   // Plano gratuito: não precisa de pagamento — envia e-mail de boas-vindas/definição de senha
   if (typedPlan === 'free') {
