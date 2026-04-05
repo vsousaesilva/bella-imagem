@@ -62,12 +62,26 @@ export async function getCustomer(customerId: string) {
 
 export interface AsaasSubscriptionInput {
   customer: string
-  billingType: 'CREDIT_CARD' | 'BOLETO' | 'PIX'
+  billingType: 'CREDIT_CARD' | 'BOLETO' | 'PIX' | 'UNDEFINED'
   value: number
   nextDueDate: string
   cycle: 'MONTHLY'
   description: string
   externalReference?: string
+  callback?: {
+    successUrl: string
+    autoRedirect?: boolean
+  }
+}
+
+export async function getSubscriptionFirstPaymentUrl(subscriptionId: string): Promise<string | null> {
+  try {
+    const data = await asaasFetch(`/subscriptions/${subscriptionId}/payments?limit=1`)
+    const payment = data.data?.[0]
+    return payment?.invoiceUrl ?? null
+  } catch {
+    return null
+  }
 }
 
 export async function createSubscription(input: AsaasSubscriptionInput) {

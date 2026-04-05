@@ -73,6 +73,9 @@ export async function POST(request: Request) {
           })
           .eq('tenant_id', tenantId)
 
+        // Envia e-mail para o admin do tenant definir sua senha
+        await sendPasswordSetupEmail(admin, tenantId)
+
         console.log(`[asaas-webhook] Pagamento confirmado — tenant:${tenantId} plan:${plan}`)
         break
       }
@@ -147,5 +150,44 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error('[asaas-webhook] Erro ao processar:', err)
     return NextResponse.json({ error: 'Erro ao processar evento' }, { status: 500 })
+  }
+}
+
+// ── helpers ──
+
+async function sendPasswordSetupEmail(
+  admin: ReturnType<typeof import('@/lib/supabase/server')['createAdminClient']>,
+  tenantId: string
+) {
+  try {
+    // Busca o perfil administrador do tenant
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('role', 'administrador')
+      .single()
+
+    if (!profile) return
+
+    // Busca o e-mail do usuário
+    const { data: authUser } = await admin.auth.admin.getUserById(profile.id)
+    const email = authUser?.user?.email
+    if (!email) return
+
+    // Envia e-mail de redefinição de senha via Supabase (cliente anon — dispara o envio de e-mail)
+    const { createClient } = await import('@supabase/supabase-js')
+    const anon = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    await anon.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://bellaimagem.ai.br/auth/callback?next=/dashboard',
+    })
+
+    console.log(`[asaas-webhook] E-mail de senha enviado para tenant:${tenantId}`)
+  } catch (err) {
+    // Não bloqueia o fluxo — pode ser retentado manualmente se necessário
+    console.error('[asaas-webhook] Erro ao enviar e-mail de senha:', err)
   }
 }
