@@ -21,6 +21,7 @@ export default function GerarImagemPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('form')
   const [error, setError] = useState<string | null>(null)
+  const [policyViolation, setPolicyViolation] = useState(false)
 
   const [clothingFile, setClothingFile] = useState<File | null>(null)
   const [clothingPreview, setClothingPreview] = useState<string | null>(null)
@@ -52,6 +53,7 @@ export default function GerarImagemPage() {
     if (!clothingFile) { setError('Selecione uma imagem da peça ou acessório.'); return }
     setStep('generating')
     setError(null)
+    setPolicyViolation(false)
 
     try {
       const clothing = await compressImage(clothingFile)
@@ -77,7 +79,12 @@ export default function GerarImagemPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) { setError(data.error ?? 'Erro ao gerar imagem.'); setStep('form'); return }
+      if (!res.ok) {
+        setPolicyViolation(data.policyViolation === true)
+        setError(data.error ?? 'Erro ao gerar imagem.')
+        setStep('form')
+        return
+      }
 
       setResult({ imageId: data.imageId, outputUrls: data.outputUrls, selectedUrl: data.outputUrls[0] })
       setSelectedVariation(0)
@@ -116,7 +123,7 @@ export default function GerarImagemPage() {
   }
 
   function handleNewGeneration() {
-    setStep('form'); setResult(null); setCaptionText(null); setError(null)
+    setStep('form'); setResult(null); setCaptionText(null); setError(null); setPolicyViolation(false)
     setClothingFile(null); setClothingPreview(null)
     setModelFile(null); setModelPreview(null); setModelDescricaoLivre('')
     setBackgroundPreset(''); setBackgroundCustom('')
@@ -149,11 +156,15 @@ export default function GerarImagemPage() {
 
       {error && (
         <div
-          className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-6"
-          style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }}
+          className="flex gap-3 text-sm px-4 py-4 rounded-xl mb-6"
+          style={
+            policyViolation
+              ? { background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24' }
+              : { background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }
+          }
         >
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          {error}
+          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span>{error}</span>
         </div>
       )}
 

@@ -204,6 +204,13 @@ async function callGemini(
 
   if (!candidate) throw new Error('Gemini não retornou candidatos')
 
+  const POLICY_REASONS = ['SAFETY', 'PROHIBITED_CONTENT', 'IMAGE_SAFETY', 'RECITATION']
+  if (POLICY_REASONS.includes(candidate.finishReason)) {
+    const err = new Error('Conteúdo bloqueado pelas políticas de uso da IA.')
+    ;(err as Error & { policyViolation: boolean }).policyViolation = true
+    throw err
+  }
+
   const imagePart = candidate.content?.parts?.find(
     (p: GeminiPart) => p.inlineData?.mimeType?.startsWith('image/')
   )

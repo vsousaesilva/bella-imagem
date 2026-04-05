@@ -247,9 +247,11 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro desconhecido'
+    const isPolicyViolation = (err as Error & { policyViolation?: boolean })?.policyViolation === true
 
     console.error('[bella-imagem] generate-image ERRO:', {
       message,
+      isPolicyViolation,
       tenantId: profile.tenant_id,
       imageRecordId: imageRecord.id,
     })
@@ -278,6 +280,16 @@ export async function POST(request: Request) {
       success: false,
       error_message: message.slice(0, 500),
     })
+
+    if (isPolicyViolation) {
+      return NextResponse.json(
+        {
+          error: 'A imagem não pôde ser gerada pois o conteúdo viola as políticas de uso da IA. Verifique as imagens enviadas — evite fotos com nudez, menores de idade em contextos inadequados ou conteúdo sensível.',
+          policyViolation: true,
+        },
+        { status: 422 }
+      )
+    }
 
     return NextResponse.json(
       { error: 'Falha na geração da imagem. Tente novamente.', detail: message },
