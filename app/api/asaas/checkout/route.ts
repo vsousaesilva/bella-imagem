@@ -9,6 +9,7 @@ import {
 import { validateTextField } from '@/lib/security/validation'
 import { toSlug } from '@/lib/utils'
 import type { PlanType } from '@/lib/types'
+import { getAffiliateProgramActive } from '@/lib/settings'
 
 const VALID_PLANS = new Set<PlanType>(['free', 'starter', 'pro', 'business'])
 
@@ -189,9 +190,9 @@ async function createNewAccount({
     userId = newUser.user.id
   }
 
-  // Validar código de afiliado (se fornecido)
+  // Validar código de afiliado (se fornecido e programa ativo)
   let validatedAffiliateCode: string | undefined
-  if (affiliateCode) {
+  if (affiliateCode && await getAffiliateProgramActive(admin)) {
     const cleanCode = affiliateCode.trim().toLowerCase()
     const { data: affiliate } = await admin
       .from('affiliates')

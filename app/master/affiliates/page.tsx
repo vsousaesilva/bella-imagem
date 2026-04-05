@@ -6,6 +6,8 @@ import { Users, DollarSign, TrendingUp, CheckCircle } from 'lucide-react'
 import type { PlanType, ReferralStatus } from '@/lib/types'
 import { PLAN_LABELS } from '@/lib/types'
 import { AffiliateRow } from '@/components/affiliate-row'
+import { AffiliateProgramToggle } from '@/components/affiliate-program-toggle'
+import { getAffiliateProgramActive } from '@/lib/settings'
 
 const STATUS_LABELS: Record<ReferralStatus, string> = {
   pending:   'Pendente',
@@ -31,6 +33,8 @@ function fmtDate(iso: string) {
 
 export default async function MasterAffiliatesPage() {
   const admin = createAdminClient()
+
+  const programActive = await getAffiliateProgramActive(admin)
 
   const { data: affiliates } = await admin
     .from('affiliates')
@@ -71,6 +75,9 @@ export default async function MasterAffiliatesPage() {
         <h1 className="text-2xl font-display font-bold tracking-tight text-bella-white">Programa de Afiliados</h1>
         <p className="text-sm text-bella-gray mt-1">Gerencie afiliados, conversões e comissões</p>
       </div>
+
+      {/* Toggle global do programa */}
+      <AffiliateProgramToggle active={programActive} />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">

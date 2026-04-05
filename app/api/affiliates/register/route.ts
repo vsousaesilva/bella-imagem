@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { validateTextField } from '@/lib/security/validation'
+import { getAffiliateProgramActive } from '@/lib/settings'
 
 const APP_URL = 'https://bellaimagem.ia.br'
 
@@ -47,6 +48,15 @@ export async function POST(request: Request) {
   const descCheck = validateTextField(description, 'description', 500)
 
   const admin = createAdminClient()
+
+  // Verificar se o programa está ativo
+  const programActive = await getAffiliateProgramActive(admin)
+  if (!programActive) {
+    return NextResponse.json(
+      { error: 'O programa de afiliados está temporariamente suspenso. Tente novamente em breve.' },
+      { status: 503 }
+    )
+  }
 
   // Verificar se e-mail já é afiliado
   const { data: existing } = await admin
