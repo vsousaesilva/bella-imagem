@@ -93,7 +93,7 @@ export default async function AfiliadoDashboardPage() {
             Seu link de afiliado
           </p>
           <div className="flex items-center gap-3">
-            <p className="flex-1 text-sm text-bella-white font-mono truncate">{referralLink}</p>
+            <p className="flex-1 text-sm font-mono truncate" style={{ color: '#ffffff' }}>{referralLink}</p>
             <CopyButton text={referralLink} />
           </div>
           <p className="text-xs text-bella-gray mt-2">Código: <strong style={{ color: '#fefefe' }}>{affiliate.code}</strong></p>
@@ -113,7 +113,7 @@ export default async function AfiliadoDashboardPage() {
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
             >
               <kpi.icon className="w-4 h-4 mb-2" style={{ color: '#c9a96e' }} />
-              <p className="text-xl font-bold text-bella-white">{kpi.value}</p>
+              <p className="text-xl font-bold" style={{ color: '#ffffff' }}>{kpi.value}</p>
               <p className="text-[11px] text-bella-gray mt-0.5 leading-tight">{kpi.label}</p>
             </div>
           ))}
