@@ -64,7 +64,7 @@ export default async function AfiliadoDashboardPage() {
   const referralLink = `${APP_URL}/planos?ref=${affiliate.code}`
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}>
+    <div className="min-h-screen" style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)' } as React.CSSProperties}>
       {/* Header */}
       <div style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">

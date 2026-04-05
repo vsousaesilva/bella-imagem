@@ -58,7 +58,7 @@ export default function AuthConfirmPage() {
     return (
       <div
         className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}
+        style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)' } as React.CSSProperties}
       >
         <div className="text-center max-w-sm">
           <p className="text-bella-white text-lg font-medium mb-2">Link inválido ou expirado</p>
@@ -80,7 +80,7 @@ export default function AuthConfirmPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center"
-      style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}
+      style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)' } as React.CSSProperties}
     >
       <p className="text-bella-gray text-sm animate-pulse">Verificando acesso...</p>
     </div>
