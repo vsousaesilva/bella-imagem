@@ -5,6 +5,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import NextImage from 'next/image'
 import { TrendingUp, DollarSign, Users, Clock } from 'lucide-react'
 import { CopyButton } from '@/components/copy-button'
+import { LogoutButton } from '@/components/logout-button'
 import type { PlanType, ReferralStatus } from '@/lib/types'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 
@@ -63,12 +64,15 @@ export default async function AfiliadoDashboardPage() {
   const referralLink = `${APP_URL}/planos?ref=${affiliate.code}`
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen" style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}>
       {/* Header */}
       <div style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <NextImage src="/logo.png" alt="Bella Imagem" width={140} height={42} className="object-contain" />
-          <span className="text-xs text-bella-gray">Painel de Afiliado</span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-bella-gray">Painel de Afiliado</span>
+            <LogoutButton />
+          </div>
         </div>
       </div>
 

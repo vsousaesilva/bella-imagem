@@ -39,7 +39,7 @@ export default function AfiliadoRegistroPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: '#0a0a0a' }}
+      style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}
     >
       <div
         className="absolute inset-0 pointer-events-none"
