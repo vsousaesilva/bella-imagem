@@ -79,6 +79,12 @@ export async function DELETE(
     .select('id')
     .eq('tenant_id', id)
 
+  // Desvincula perfis do tenant antes de excluir (FK sem CASCADE)
+  await admin
+    .from('profiles')
+    .update({ tenant_id: null })
+    .eq('tenant_id', id)
+
   // Exclui o tenant — cascade remove subscriptions, memberships, imagens etc.
   const { error: deleteError } = await admin
     .from('tenants')
@@ -90,7 +96,7 @@ export async function DELETE(
     return NextResponse.json({ error: deleteError.message }, { status: 500 })
   }
 
-  // Exclui os usuários do auth (melhor esforço — não bloqueia se falhar)
+  // Exclui os usuários do auth (remove também os profiles via cascade em auth.users)
   if (members?.length) {
     await Promise.all(
       members.map(m => admin.auth.admin.deleteUser(m.id))
