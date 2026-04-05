@@ -45,3 +45,57 @@ export async function GET(
 
   return NextResponse.json({ tenant, users: users ?? [] })
 }
+
+/** DELETE — exclui tenant e todos os dados associados (apenas master) */
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    return NextResponse.json({ error: 'ID inválido.' }, { status: 400 })
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+
+  const admin = createAdminClient()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'master') {
+    return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+  }
+
+  // Busca os usuários do tenant para excluir do auth depois
+  const { data: members } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('tenant_id', id)
+
+  // Exclui o tenant — cascade remove subscriptions, memberships, imagens etc.
+  const { error: deleteError } = await admin
+    .from('tenants')
+    .delete()
+    .eq('id', id)
+
+  if (deleteError) {
+    console.error('[admin/tenants] Erro ao excluir tenant:', deleteError)
+    return NextResponse.json({ error: deleteError.message }, { status: 500 })
+  }
+
+  // Exclui os usuários do auth (melhor esforço — não bloqueia se falhar)
+  if (members?.length) {
+    await Promise.all(
+      members.map(m => admin.auth.admin.deleteUser(m.id))
+    )
+  }
+
+  return NextResponse.json({ ok: true })
+}

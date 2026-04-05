@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { PLAN_LABELS, PLAN_COLORS } from '@/lib/types'
 import type { PlanType, UserRole } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Save, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Save, ArrowLeft, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react'
 
 interface TenantData {
   id: string
@@ -32,6 +32,7 @@ export default function EditTenantPage() {
   const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
   const [name, setName] = useState('')
@@ -85,6 +86,20 @@ export default function EditTenantPage() {
       body: JSON.stringify({ userId, active: !currentActive }),
     })
     if (res.ok) setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, active: !currentActive } : u))
+  }
+
+  async function handleDelete() {
+    if (!window.confirm(`Excluir permanentemente a empresa "${tenant?.name}" e todos os seus dados? Esta ação não pode ser desfeita.`)) return
+
+    setDeleting(true)
+    const res = await fetch(`/api/admin/tenants/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      router.push('/master/tenants')
+    } else {
+      const data = await res.json()
+      setFeedback({ type: 'error', msg: data.error ?? 'Erro ao excluir empresa.' })
+      setDeleting(false)
+    }
   }
 
   async function handleChangeRole(userId: string, role: UserRole) {
@@ -200,7 +215,7 @@ export default function EditTenantPage() {
       </section>
 
       {/* Usuários */}
-      <section className="rounded-2xl p-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
+      <section className="rounded-2xl p-6 mb-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-medium text-bella-white">Usuários</h2>
           <span className="text-[11px] text-bella-gray">{users.length} usuário(s)</span>
@@ -241,6 +256,23 @@ export default function EditTenantPage() {
             ))}
           </div>
         )}
+      </section>
+      {/* Zona de perigo */}
+      <section className="rounded-2xl p-6" style={{ background: 'rgba(248,113,113,0.04)', border: '1px solid rgba(248,113,113,0.15)' }}>
+        <h2 className="font-medium text-red-400 mb-2">Zona de perigo</h2>
+        <p className="text-xs text-bella-gray mb-4">
+          Exclui permanentemente esta empresa, todos os usuários, imagens geradas e dados de assinatura.
+          Esta ação não pode ser desfeita.
+        </p>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+          style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171' }}
+        >
+          <Trash2 className="w-4 h-4" />
+          {deleting ? 'Excluindo...' : 'Excluir empresa permanentemente'}
+        </button>
       </section>
     </div>
   )
