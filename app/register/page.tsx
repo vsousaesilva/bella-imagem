@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import NextImage from 'next/image'
 import { AlertCircle, Loader2 } from 'lucide-react'
@@ -23,6 +23,14 @@ const PLAN_PRICES: Record<PlanType, string> = {
 const VALID_PLANS = new Set<string>(['free', 'starter', 'pro', 'business'])
 
 export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
+  )
+}
+
+function RegisterForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
