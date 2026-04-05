@@ -72,11 +72,31 @@ export async function POST(request: Request) {
     }
   }
 
+  // Busca contexto da imagem gerada para alinhar a legenda com o conteúdo visual.
+  // Usamos o prompt_used (texto) em vez de reenviar a imagem — 10x mais barato em tokens.
+  let imageContext: string | undefined
+  if (body.imageId) {
+    const { data: imageRecord } = await admin
+      .from('generated_images')
+      .select('prompt_used, background_preset, background_custom, aspect_ratio')
+      .eq('id', body.imageId)
+      .eq('tenant_id', profile.tenant_id)
+      .single()
+
+    if (imageRecord?.prompt_used) {
+      const parts: string[] = [`Prompt de geração: ${imageRecord.prompt_used}`]
+      if (imageRecord.background_preset) parts.push(`Cenário: ${imageRecord.background_preset}`)
+      if (imageRecord.background_custom) parts.push(`Fundo personalizado: ${imageRecord.background_custom}`)
+      if (imageRecord.aspect_ratio) parts.push(`Formato: ${imageRecord.aspect_ratio}`)
+      imageContext = parts.join(' | ')
+    }
+  }
+
   const startTime = Date.now()
 
   try {
     const result = await generateCaption(
-      { imageDescription: descCheck.sanitized },
+      { imageDescription: descCheck.sanitized, imageContext },
       tenant as Tenant
     )
 
