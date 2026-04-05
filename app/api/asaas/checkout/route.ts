@@ -212,13 +212,18 @@ async function createNewAccount({
 
   const tenantId = tenant.id
 
-  // Criar profile + membership
-  await admin.from('profiles').insert({
-    id: userId,
+  // O trigger handle_new_user já cria o profile com role='operador' ao criar o auth user.
+  // Precisamos atualizar (não inserir) para definir tenant_id, role e full_name corretos.
+  await admin
+    .from('profiles')
+    .update({ tenant_id: tenantId, full_name: name, role: 'administrador', active: true })
+    .eq('id', userId)
+
+  // Registrar membership N:N
+  await admin.from('tenant_memberships').insert({
+    user_id: userId,
     tenant_id: tenantId,
-    full_name: name,
     role: 'administrador',
-    active: true,
   })
 
   await admin.from('subscriptions').insert({
