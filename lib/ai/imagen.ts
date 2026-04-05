@@ -261,8 +261,9 @@ async function callGemini(
     throw new Error('Gemini não retornou imagem')
   }
 
-  const tokensInput = data.usageMetadata?.promptTokenCount ?? 0
-  const tokensOutput = data.usageMetadata?.candidatesTokenCount ?? 0
+  const usageMetadata = data.usageMetadata as { promptTokenCount?: number; candidatesTokenCount?: number } | undefined
+  const tokensInput = usageMetadata?.promptTokenCount ?? 0
+  const tokensOutput = usageMetadata?.candidatesTokenCount ?? 0
 
   return {
     base64: imagePart.inlineData.data,
