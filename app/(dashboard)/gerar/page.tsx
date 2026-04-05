@@ -384,6 +384,26 @@ function ResultState({ result, selectedVariation, onSelectVariation, captionText
   captionText: string | null; captionError: string | null; generatingCaption: boolean
   onGenerateCaption: () => void; onNewGeneration: () => void
 }) {
+  const [downloading, setDownloading] = useState(false)
+
+  async function handleDownload() {
+    const url = result.outputUrls[selectedVariation]
+    if (!url || downloading) return
+    setDownloading(true)
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = objectUrl
+      a.download = `bella-imagem-v${selectedVariation + 1}.jpg`
+      a.click()
+      URL.revokeObjectURL(objectUrl)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
@@ -431,12 +451,10 @@ function ResultState({ result, selectedVariation, onSelectVariation, captionText
       </div>
 
       <div className="flex flex-wrap gap-3 mb-8">
-        <a href={result.outputUrls[selectedVariation]} download={`bella-imagem-v${selectedVariation + 1}.jpg`}
-          target="_blank" rel="noopener noreferrer" className="btn-primary"
-        >
+        <button onClick={handleDownload} disabled={downloading} className="btn-primary">
           <Download className="w-4 h-4" />
-          <span>Baixar variação {selectedVariation + 1}</span>
-        </a>
+          <span>{downloading ? 'Baixando...' : `Baixar variação ${selectedVariation + 1}`}</span>
+        </button>
 
         {!captionText && !captionError && (
           <button onClick={onGenerateCaption} disabled={generatingCaption} className="btn-outline">
