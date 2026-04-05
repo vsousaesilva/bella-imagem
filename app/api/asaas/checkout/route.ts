@@ -80,18 +80,69 @@ export async function POST(request: Request) {
     user_metadata: { full_name: nameCheck.sanitized },
   })
 
+  // ── Usuário já existe: tentar retomar pagamento pendente ──
   if (userError) {
-    if (userError.message?.includes('already')) {
+    if (!userError.message?.includes('already')) {
+      console.error('[checkout] Erro ao criar usuário:', userError)
       return NextResponse.json(
-        { error: 'E-mail já cadastrado. Acesse a plataforma pelo link de login.' },
+        { error: 'Erro ao criar conta. Tente novamente.', detail: isSandbox ? userError.message : undefined },
+        { status: 500 }
+      )
+    }
+
+    // Busca o usuário existente pelo e-mail
+    const { data: existingUsers } = await admin.auth.admin.listUsers()
+    const existingUser = existingUsers?.users.find(u => u.email === email)
+    if (!existingUser) {
+      return NextResponse.json({ error: 'Erro ao localizar conta. Tente novamente.' }, { status: 500 })
+    }
+
+    // Busca a subscription do tenant deste usuário
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('tenant_id')
+      .eq('id', existingUser.id)
+      .single()
+
+    if (!profile?.tenant_id) {
+      return NextResponse.json(
+        { error: 'Conta encontrada mas sem tenant associado. Entre em contato com o suporte.' },
         { status: 409 }
       )
     }
-    console.error('[checkout] Erro ao criar usuário:', userError)
-    return NextResponse.json(
-      { error: 'Erro ao criar conta. Tente novamente.', detail: isSandbox ? userError.message : undefined },
-      { status: 500 }
-    )
+
+    const { data: sub } = await admin
+      .from('subscriptions')
+      .select('status, asaas_customer_id, asaas_subscription_id')
+      .eq('tenant_id', profile.tenant_id)
+      .single()
+
+    // Assinatura já ativa — direcionar para login
+    if (sub?.status === 'active') {
+      return NextResponse.json(
+        { error: 'Este e-mail já possui uma assinatura ativa. Acesse a plataforma pelo link de login.' },
+        { status: 409 }
+      )
+    }
+
+    // Plano gratuito: re-enviar e-mail de senha e redirecionar
+    if (typedPlan === 'free') {
+      await sendPasswordSetupEmail(email)
+      return NextResponse.json({ checkoutUrl: `${APP_URL}/bem-vindo?plan=free` })
+    }
+
+    // Assinatura pendente — gerar novo link de pagamento para o mesmo tenant
+    console.log(`[checkout] Retomando pagamento para tenant:${profile.tenant_id}`)
+    return await gerarLinkPagamento({
+      admin,
+      tenantId: profile.tenant_id,
+      typedPlan,
+      name: nameCheck.sanitized,
+      email,
+      cpfCnpj,
+      phone,
+      isSandbox,
+    })
   }
 
   const userId = newUser.user.id
@@ -140,17 +191,50 @@ export async function POST(request: Request) {
   if (profileResult.error) console.error('[checkout] Erro ao criar profile:', profileResult.error)
   if (membershipResult.error) console.error('[checkout] Erro ao criar membership:', membershipResult.error)
 
-  // Plano gratuito: não precisa de pagamento — envia e-mail de boas-vindas/definição de senha
+  // Plano gratuito: não precisa de pagamento — envia e-mail de definição de senha
   if (typedPlan === 'free') {
     await sendPasswordSetupEmail(email)
     return NextResponse.json({ checkoutUrl: `${APP_URL}/bem-vindo?plan=free` })
   }
 
+  return await gerarLinkPagamento({
+    admin,
+    tenantId,
+    typedPlan,
+    name: nameCheck.sanitized,
+    email,
+    cpfCnpj,
+    phone,
+    isSandbox,
+  })
+}
+
+// ── Gera customer + subscription no Asaas e retorna invoiceUrl ──
+
+async function gerarLinkPagamento({
+  admin,
+  tenantId,
+  typedPlan,
+  name,
+  email,
+  cpfCnpj,
+  phone,
+  isSandbox,
+}: {
+  admin: ReturnType<typeof createAdminClient>
+  tenantId: string
+  typedPlan: PlanType
+  name: string
+  email: string
+  cpfCnpj?: string
+  phone?: string
+  isSandbox: boolean
+}): Promise<NextResponse> {
   // Criar customer no Asaas
   let asaasCustomerId: string
   try {
     const customer = await createCustomer({
-      name: nameCheck.sanitized,
+      name,
       email,
       cpfCnpj: cpfCnpj?.replace(/\D/g, '') || undefined,
       phone: phone?.replace(/\D/g, '') || undefined,
@@ -159,7 +243,10 @@ export async function POST(request: Request) {
     asaasCustomerId = customer.id
   } catch (err) {
     console.error('[checkout] Erro ao criar customer Asaas:', err)
-    return NextResponse.json({ error: 'Erro ao iniciar pagamento. Tente novamente.' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro ao iniciar pagamento. Tente novamente.', detail: isSandbox ? String(err) : undefined },
+      { status: 500 }
+    )
   }
 
   // Data de vencimento: amanhã
@@ -172,7 +259,7 @@ export async function POST(request: Request) {
   try {
     const subscription = await createSubscription({
       customer: asaasCustomerId,
-      billingType: 'UNDEFINED', // deixa o cliente escolher: PIX, boleto ou cartão
+      billingType: 'UNDEFINED',
       value: PLAN_PRICES_BRL[typedPlan],
       nextDueDate: dueDateStr,
       cycle: 'MONTHLY',
@@ -182,10 +269,13 @@ export async function POST(request: Request) {
     asaasSubscriptionId = subscription.id
   } catch (err) {
     console.error('[checkout] Erro ao criar subscription Asaas:', err)
-    return NextResponse.json({ error: 'Erro ao iniciar pagamento. Tente novamente.' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro ao iniciar pagamento. Tente novamente.', detail: isSandbox ? String(err) : undefined },
+      { status: 500 }
+    )
   }
 
-  // Buscar URL da primeira cobrança (hosted checkout do Asaas)
+  // Buscar URL da primeira cobrança
   const invoiceUrl = await getSubscriptionFirstPaymentUrl(asaasSubscriptionId)
   if (!invoiceUrl) {
     console.error('[checkout] Sem invoiceUrl para subscription:', asaasSubscriptionId)
