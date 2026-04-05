@@ -76,7 +76,7 @@ export default async function AfiliadoDashboardPage() {
 
         {/* Saudação */}
         <div>
-          <h1 className="text-2xl font-display font-medium text-bella-white">
+          <h1 className="text-2xl font-display font-medium" style={{ color: '#ffffff' }}>
             Olá, {affiliate.name.split(' ')[0]}!
           </h1>
           <p className="text-sm text-bella-gray mt-1">
