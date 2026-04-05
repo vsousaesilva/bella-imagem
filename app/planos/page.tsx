@@ -1,13 +1,12 @@
-'use client'
+export const dynamic = 'force-dynamic'
 
-import { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
 import NextImage from 'next/image'
 import { Check, Zap } from 'lucide-react'
+import { createAdminClient } from '@/lib/supabase/server'
 
 const PLANS = [
   {
-    key: 'starter' as const,
+    key: 'starter',
     label: 'Starter',
     price: 'R$ 149',
     period: '/mês',
@@ -22,7 +21,7 @@ const PLANS = [
     highlight: true,
   },
   {
-    key: 'pro' as const,
+    key: 'pro',
     label: 'Pro',
     price: 'R$ 499',
     period: '/mês',
@@ -38,7 +37,7 @@ const PLANS = [
     highlight: false,
   },
   {
-    key: 'business' as const,
+    key: 'business',
     label: 'Business',
     price: 'R$ 1.999',
     period: '/mês',
@@ -56,22 +55,29 @@ const PLANS = [
   },
 ]
 
-export default function PlanosPage() {
-  return (
-    <Suspense>
-      <PlanosContent />
-    </Suspense>
-  )
+function buildUrl(plan: string, ref: string) {
+  const params = new URLSearchParams({ plan })
+  if (ref) params.set('ref', ref)
+  return `/register?${params.toString()}`
 }
 
-function PlanosContent() {
-  const searchParams = useSearchParams()
-  const ref = searchParams.get('ref') ?? ''
+export default async function PlanosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>
+}) {
+  const { ref = '' } = await searchParams
 
-  function buildUrl(plan: string) {
-    const params = new URLSearchParams({ plan })
-    if (ref) params.set('ref', ref)
-    return `/register?${params.toString()}`
+  let affiliateName: string | null = null
+  if (ref) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('affiliates')
+      .select('name')
+      .eq('code', ref.trim().toLowerCase())
+      .eq('active', true)
+      .single()
+    affiliateName = data?.name ?? null
   }
 
   return (
@@ -103,13 +109,13 @@ function PlanosContent() {
           <p className="text-bella-gray mt-2 text-sm">
             Gere imagens profissionais de moda com IA em segundos
           </p>
-          {ref && (
+          {affiliateName && (
             <div
               className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-medium"
               style={{ background: 'rgba(201,169,110,0.12)', border: '1px solid rgba(201,169,110,0.25)', color: '#c9a96e' }}
             >
               <Zap className="w-3 h-3" />
-              Indicação de afiliado · código {ref}
+              Indicação d{affiliateName.trim().match(/^[AEIOUaeiou]/) ? 'o(a)' : 'o(a)'} afiliado(a) {affiliateName.split(' ')[0]}
             </div>
           )}
         </div>
@@ -122,14 +128,8 @@ function PlanosContent() {
               className="relative rounded-2xl p-6 flex flex-col"
               style={
                 plan.highlight
-                  ? {
-                      background: 'rgba(201,169,110,0.07)',
-                      border: '1px solid rgba(201,169,110,0.35)',
-                    }
-                  : {
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                    }
+                  ? { background: 'rgba(201,169,110,0.07)', border: '1px solid rgba(201,169,110,0.35)' }
+                  : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }
               }
             >
               {plan.popular && (
@@ -165,7 +165,7 @@ function PlanosContent() {
               </ul>
 
               <a
-                href={buildUrl(plan.key)}
+                href={buildUrl(plan.key, ref)}
                 className="block text-center text-sm font-semibold py-2.5 rounded-xl transition-all"
                 style={
                   plan.highlight
@@ -191,7 +191,7 @@ function PlanosContent() {
             </p>
           </div>
           <a
-            href={buildUrl('free')}
+            href={buildUrl('free', ref)}
             className="text-xs font-medium text-bella-gray hover:text-white transition-colors whitespace-nowrap underline underline-offset-2"
           >
             Criar conta gratuita →
