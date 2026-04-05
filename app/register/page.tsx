@@ -36,6 +36,7 @@ function RegisterForm() {
 
   const rawPlan = searchParams.get('plan') ?? 'free'
   const plan: PlanType = VALID_PLANS.has(rawPlan) ? (rawPlan as PlanType) : 'free'
+  const affiliateCode = searchParams.get('ref') ?? undefined
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -76,7 +77,7 @@ function RegisterForm() {
       const res = await fetch('/api/asaas/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, name, email, cpfCnpj, phone }),
+        body: JSON.stringify({ plan, name, email, cpfCnpj, phone, affiliateCode }),
       })
 
       const data = await res.json()

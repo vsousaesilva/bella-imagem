@@ -36,12 +36,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'JSON inválido.' }, { status: 400 })
   }
 
-  const { plan, name, email, cpfCnpj, phone } = body as {
+  const { plan, name, email, cpfCnpj, phone, affiliateCode } = body as {
     plan?: string
     name?: string
     email?: string
     cpfCnpj?: string
     phone?: string
+    affiliateCode?: string
   }
 
   // Validações
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
     if (!profile?.tenant_id) {
       // Usuário órfão (tenant foi excluído mas auth não) — remove e recria como novo cadastro
       await admin.auth.admin.deleteUser(existingUser.id)
-      return await createNewAccount({ admin, plan: typedPlan, name: nameCheck.sanitized, email, cpfCnpj, phone, isSandbox })
+      return await createNewAccount({ admin, plan: typedPlan, name: nameCheck.sanitized, email, cpfCnpj, phone, isSandbox, affiliateCode })
     }
 
     const { data: sub } = await admin
@@ -144,7 +145,7 @@ export async function POST(request: Request) {
     })
   }
 
-  return await createNewAccount({ admin, plan: typedPlan, name: nameCheck.sanitized, email, cpfCnpj, phone, isSandbox, existingUserId: newUser.user.id })
+  return await createNewAccount({ admin, plan: typedPlan, name: nameCheck.sanitized, email, cpfCnpj, phone, isSandbox, existingUserId: newUser.user.id, affiliateCode })
 }
 
 // ── Cria tenant + usuário + assinatura do zero ──
@@ -158,6 +159,7 @@ async function createNewAccount({
   phone,
   isSandbox,
   existingUserId,
+  affiliateCode,
 }: {
   admin: ReturnType<typeof createAdminClient>
   plan: PlanType
@@ -167,6 +169,7 @@ async function createNewAccount({
   phone?: string
   isSandbox: boolean
   existingUserId?: string
+  affiliateCode?: string
 }): Promise<NextResponse> {
   // Se não veio um userId existente, cria o usuário agora
   let userId = existingUserId
@@ -186,6 +189,19 @@ async function createNewAccount({
     userId = newUser.user.id
   }
 
+  // Validar código de afiliado (se fornecido)
+  let validatedAffiliateCode: string | undefined
+  if (affiliateCode) {
+    const cleanCode = affiliateCode.trim().toLowerCase()
+    const { data: affiliate } = await admin
+      .from('affiliates')
+      .select('code')
+      .eq('code', cleanCode)
+      .eq('active', true)
+      .single()
+    if (affiliate) validatedAffiliateCode = affiliate.code
+  }
+
   // Criar tenant
   const slug = toSlug(name)
   const { data: tenant, error: tenantError } = await admin
@@ -197,6 +213,7 @@ async function createNewAccount({
       active: true,
       quota_limit: QUOTA_MAP[plan],
       quota_used: 0,
+      ...(validatedAffiliateCode ? { affiliate_code: validatedAffiliateCode } : {}),
     })
     .select('id')
     .single()

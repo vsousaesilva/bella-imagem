@@ -181,3 +181,135 @@ export async function sendFreeWelcomeEmail({
 
   if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`)
 }
+
+// ── E-mail de boas-vindas para novo afiliado ──
+
+export async function sendAffiliateWelcomeEmail({
+  to,
+  name,
+  code,
+  passwordLink,
+}: {
+  to: string
+  name: string
+  code: string
+  passwordLink: string
+}) {
+  const referralLink = `${APP_URL}/register?ref=${code}`
+
+  const html = baseTemplate(`
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:600;color:#fefefe;font-family:Georgia,serif;">
+      Bem-vindo ao programa de afiliados!
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:#b0b0b0;line-height:1.6;">
+      Olá, <strong style="color:#fefefe;">${name}</strong>! Seu cadastro como afiliado da Bella Imagem foi aprovado.
+      Comece a compartilhar seu link e ganhe <strong style="color:#c9a96e;">20% de comissão</strong> em cada venda.
+    </p>
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:12px;padding:20px 24px;margin:0 0 24px;">
+      <tr><td>
+        <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#c9a96e;letter-spacing:0.2em;text-transform:uppercase;">Seu link de afiliado</p>
+        <p style="margin:0;font-size:13px;color:#fefefe;word-break:break-all;">${referralLink}</p>
+      </td></tr>
+    </table>
+
+    <p style="margin:0 0 8px;font-size:13px;color:#b0b0b0;">Para acessar seu painel e começar, crie sua senha:</p>
+
+    <table cellpadding="0" cellspacing="0" style="margin:16px 0 24px;">
+      <tr>
+        <td bgcolor="#c9a96e" style="border-radius:100px;padding:14px 32px;">
+          <a href="${passwordLink}" style="color:#0a0a0a;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;">
+            Criar minha senha
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0;font-size:12px;color:#6b6b6b;line-height:1.6;">
+      O link expira em <strong style="color:#b0b0b0;">24 horas</strong>. Se expirar, use
+      <em>Esqueci minha senha</em> em
+      <a href="${APP_URL}/login" style="color:#c9a96e;text-decoration:none;">bellaimagem.ia.br</a>.
+    </p>
+  `)
+
+  const resend = getResend()
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: 'Bem-vindo ao programa de afiliados Bella Imagem!',
+    html,
+  })
+
+  if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`)
+}
+
+// ── E-mail de conversão para afiliado ──
+
+export async function sendAffiliateConversionEmail({
+  to,
+  affiliateName,
+  plan,
+  valueBrl,
+  commissionBrl,
+}: {
+  to: string
+  affiliateName: string
+  plan: string
+  valueBrl: number
+  commissionBrl: number
+}) {
+  const planLabels: Record<string, string> = { starter: 'Starter', pro: 'Pro', business: 'Business' }
+  const planLabel = planLabels[plan] ?? plan
+  const fmtBrl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+  const html = baseTemplate(`
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:600;color:#fefefe;font-family:Georgia,serif;">
+      Nova conversão! 🎉
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:#b0b0b0;line-height:1.6;">
+      Olá, <strong style="color:#fefefe;">${affiliateName}</strong>! Uma nova venda foi realizada pelo seu link de afiliado.
+    </p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:12px;padding:20px 24px;margin:0 0 24px;">
+      <tr><td>
+        <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#c9a96e;letter-spacing:0.2em;text-transform:uppercase;">Detalhes da conversão</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="font-size:13px;color:#b0b0b0;padding:4px 0;">Plano contratado</td>
+            <td style="font-size:13px;color:#fefefe;text-align:right;font-weight:600;">Plano ${planLabel}</td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#b0b0b0;padding:4px 0;">Valor da venda</td>
+            <td style="font-size:13px;color:#fefefe;text-align:right;">${fmtBrl(valueBrl)}/mês</td>
+          </tr>
+          <tr>
+            <td style="font-size:14px;color:#c9a96e;padding:8px 0 0;font-weight:600;">Sua comissão</td>
+            <td style="font-size:18px;color:#c9a96e;text-align:right;font-weight:700;padding:8px 0 0;">${fmtBrl(commissionBrl)}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+    <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+      <tr>
+        <td bgcolor="#c9a96e" style="border-radius:100px;padding:14px 32px;">
+          <a href="${APP_URL}/afiliado/dashboard" style="color:#0a0a0a;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;">
+            Ver meu painel
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0;font-size:12px;color:#6b6b6b;line-height:1.6;">
+      Sua comissão já foi registrada. Continue compartilhando seu link e acumule mais!
+    </p>
+  `)
+
+  const resend = getResend()
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `💰 Nova conversão — você ganhou ${fmtBrl(commissionBrl)}!`,
+    html,
+  })
+
+  if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`)
+}
+

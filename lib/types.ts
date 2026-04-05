@@ -252,3 +252,32 @@ export const PLAN_COLORS: Record<PlanType, string> = {
   pro:      'bg-purple-500/[0.12] text-purple-300',
   business: 'bg-bella-gold/[0.15] text-bella-gold',
 }
+
+// ──────────────────────────────────────────────────────────────
+// Afiliados
+// ──────────────────────────────────────────────────────────────
+
+export type ReferralStatus = 'pending' | 'confirmed' | 'paid' | 'cancelled'
+
+export interface Affiliate {
+  id: string
+  user_id: string | null
+  name: string
+  email: string
+  code: string
+  commission_pct: number
+  active: boolean
+  created_at: string
+}
+
+export interface AffiliateReferral {
+  id: string
+  affiliate_id: string
+  tenant_id: string | null
+  plan: PlanType | null
+  value_brl: number | null
+  commission_brl: number | null
+  status: ReferralStatus
+  asaas_payment_id: string | null
+  created_at: string
+}

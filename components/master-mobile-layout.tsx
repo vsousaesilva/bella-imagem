@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, Building2, Home, Menu, ShieldCheck, X } from 'lucide-react'
+import { BarChart2, Building2, Home, Menu, ShieldCheck, Users, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV = [
   { href: '/master',            label: 'Visão geral', icon: Home },
   { href: '/master/tenants',    label: 'Empresas',    icon: Building2 },
   { href: '/master/relatorios', label: 'Relatórios',  icon: BarChart2 },
+  { href: '/master/affiliates',  label: 'Afiliados',   icon: Users },
 ]
 
 export function MasterMobileLayout({ children }: { children: React.ReactNode }) {

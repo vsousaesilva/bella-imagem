@@ -76,6 +76,9 @@ export async function POST(request: Request) {
         // Envia e-mail de boas-vindas com link de criação de senha
         await sendWelcomeEmailToTenant(admin, tenantId, plan)
 
+        // Registra conversão de afiliado (se houver)
+        await registrarConversaoAfiliado(admin, tenantId, plan, valueBrl, payload.payment?.id)
+
         console.log(`[asaas-webhook] Pagamento confirmado — tenant:${tenantId} plan:${plan}`)
         break
       }
@@ -197,5 +200,60 @@ async function sendWelcomeEmailToTenant(
     console.log(`[asaas-webhook] E-mail de boas-vindas enviado — tenant:${tenantId}`)
   } catch (err) {
     console.error('[asaas-webhook] Erro ao enviar e-mail de boas-vindas:', err)
+  }
+}
+
+// ── Registra conversão de afiliado quando pagamento é confirmado ──
+
+async function registrarConversaoAfiliado(
+  admin: ReturnType<typeof import('@/lib/supabase/server')['createAdminClient']>,
+  tenantId: string,
+  plan: PlanType,
+  valueBrl: number,
+  asaasPaymentId?: string
+) {
+  try {
+    const { data: tenant } = await admin
+      .from('tenants')
+      .select('affiliate_code')
+      .eq('id', tenantId)
+      .single()
+
+    if (!tenant?.affiliate_code) return
+
+    const { data: affiliate } = await admin
+      .from('affiliates')
+      .select('id, commission_pct, email, name')
+      .eq('code', tenant.affiliate_code)
+      .eq('active', true)
+      .single()
+
+    if (!affiliate) return
+
+    const commissionBrl = Math.round(valueBrl * (affiliate.commission_pct / 100) * 100) / 100
+
+    await admin.from('affiliate_referrals').insert({
+      affiliate_id: affiliate.id,
+      tenant_id: tenantId,
+      plan,
+      value_brl: valueBrl,
+      commission_brl: commissionBrl,
+      status: 'confirmed',
+      asaas_payment_id: asaasPaymentId ?? null,
+    })
+
+    // Notifica o afiliado por e-mail
+    const { sendAffiliateConversionEmail } = await import('@/lib/email')
+    await sendAffiliateConversionEmail({
+      to: affiliate.email,
+      affiliateName: affiliate.name,
+      plan,
+      valueBrl,
+      commissionBrl,
+    })
+
+    console.log(`[asaas-webhook] Conversão afiliado registrada — affiliate:${affiliate.id} tenant:${tenantId} comissão:R$${commissionBrl}`)
+  } catch (err) {
+    console.error('[asaas-webhook] Erro ao registrar conversão de afiliado:', err)
   }
 }

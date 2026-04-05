@@ -24,6 +24,15 @@ export default async function DashboardPage() {
     .single()
 
   if (!profile?.tenant_id) {
+    // Verifica se é um afiliado sem tenant — redireciona para o painel de afiliado
+    const { data: affiliate } = await admin
+      .from('affiliates')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (affiliate) redirect('/afiliado/dashboard')
+
     return (
       <div className="p-8">
         <h1 className="text-2xl font-display font-medium text-bella-white">Bem-vindo(a)!</h1>
