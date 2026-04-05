@@ -96,8 +96,8 @@ export async function sendWelcomeEmail({
     <!-- CTA -->
     <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
       <tr>
-        <td style="background:linear-gradient(135deg,#c9a96e,#dfc9a0);border-radius:100px;padding:14px 32px;">
-          <a href="${passwordLink}" style="color:#0a0a0a;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+        <td bgcolor="#c9a96e" style="border-radius:100px;padding:14px 32px;">
+          <a href="${passwordLink}" style="color:#0a0a0a;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;">
             Criar minha senha
           </a>
         </td>
@@ -156,8 +156,8 @@ export async function sendFreeWelcomeEmail({
 
     <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
       <tr>
-        <td style="background:linear-gradient(135deg,#c9a96e,#dfc9a0);border-radius:100px;padding:14px 32px;">
-          <a href="${passwordLink}" style="color:#0a0a0a;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+        <td bgcolor="#c9a96e" style="border-radius:100px;padding:14px 32px;">
+          <a href="${passwordLink}" style="color:#0a0a0a;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;">
             Criar minha senha
           </a>
         </td>

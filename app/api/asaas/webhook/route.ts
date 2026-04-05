@@ -26,15 +26,7 @@ export async function POST(request: Request) {
   }
 
   if (!timingSafeCompare(token ?? '', expectedToken)) {
-    // Log temporário de diagnóstico — remover após resolver
-    console.warn('[asaas-webhook] Token inválido recebido', {
-      receivedToken: token,
-      expectedLength: expectedToken.length,
-      receivedLength: (token ?? '').length,
-      allHeaders: Object.fromEntries(
-        ['asaas-access-token', 'access_token', 'authorization', 'x-access-token'].map(h => [h, request.headers.get(h)])
-      ),
-    })
+    console.warn('[asaas-webhook] Token inválido recebido')
     return NextResponse.json({ error: 'Token inválido' }, { status: 401 })
   }
 
