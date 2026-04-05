@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Users, DollarSign, TrendingUp, CheckCircle } from 'lucide-react'
 import type { PlanType, ReferralStatus } from '@/lib/types'
 import { PLAN_LABELS } from '@/lib/types'
+import { AffiliateRow } from '@/components/affiliate-row'
 
 const STATUS_LABELS: Record<ReferralStatus, string> = {
   pending:   'Pendente',
@@ -103,7 +104,7 @@ export default async function MasterAffiliatesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  {['Afiliado', 'Código', 'Comissão %', 'Conversões', 'Comissão acum.', 'Pendente', 'Status', 'Desde'].map(h => (
+                  {['Afiliado', 'Código', 'Comissão %', 'Conversões', 'Comissão acum.', 'Pendente', 'Status', 'Desde', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] uppercase tracking-wide text-bella-gray">{h}</th>
                   ))}
                 </tr>
@@ -112,25 +113,20 @@ export default async function MasterAffiliatesPage() {
                 {safeAffiliates.map(a => {
                   const s = statsMap[a.id]
                   return (
-                    <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-3">
-                        <p className="text-bella-white font-medium">{a.name}</p>
-                        <p className="text-[11px] text-bella-gray">{a.email}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-xs" style={{ color: '#c9a96e' }}>{a.code}</span>
-                      </td>
-                      <td className="px-4 py-3 text-bella-white">{a.commission_pct}%</td>
-                      <td className="px-4 py-3 text-bella-white">{s.confirmed}/{s.total}</td>
-                      <td className="px-4 py-3 font-semibold" style={{ color: '#c9a96e' }}>{fmtBrl(s.commission)}</td>
-                      <td className="px-4 py-3 text-bella-gray">{fmtBrl(s.pending)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${a.active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                          {a.active ? 'Ativo' : 'Inativo'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-bella-gray text-xs">{fmtDate(a.created_at)}</td>
-                    </tr>
+                    <AffiliateRow
+                      key={a.id}
+                      id={a.id}
+                      name={a.name}
+                      email={a.email}
+                      code={a.code}
+                      commissionPct={a.commission_pct}
+                      active={a.active}
+                      confirmedCount={s.confirmed}
+                      totalCount={s.total}
+                      commission={s.commission}
+                      pending={s.pending}
+                      createdAt={a.created_at}
+                    />
                   )
                 })}
               </tbody>
