@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, Building2, Home, Menu, ShieldCheck, Users, X } from 'lucide-react'
+import { BarChart2, BookOpen, Building2, Home, Menu, ShieldCheck, Users, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
   { href: '/master/tenants',    label: 'Empresas',    icon: Building2 },
   { href: '/master/relatorios', label: 'Relatórios',  icon: BarChart2 },
   { href: '/master/affiliates',  label: 'Afiliados',   icon: Users },
+  { href: '/master/blog',        label: 'Blog',         icon: BookOpen },
 ]
 
 export function MasterMobileLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +19,7 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname()
 
   return (
-    <div className="flex min-h-screen bg-bella-black">
+    <div className="flex min-h-screen bg-bella-black" style={{ '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}>
       {/* Backdrop */}
       {sidebarOpen && (
         <div

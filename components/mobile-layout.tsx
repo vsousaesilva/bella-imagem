@@ -18,7 +18,7 @@ export function MobileLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--main-bg)' }}>
+    <div className="flex min-h-screen" style={{ background: 'var(--main-bg)', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0' } as React.CSSProperties}>
       <Sidebar
         profile={profile}
         tenant={tenant}
