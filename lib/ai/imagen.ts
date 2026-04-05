@@ -194,28 +194,72 @@ async function callGemini(
     body: JSON.stringify(body),
   })
 
+  const responseText = await res.text()
+
   if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`Gemini API error ${res.status}: ${err}`)
+    // Verifica se o erro HTTP é relacionado a política de uso
+    const lowerText = responseText.toLowerCase()
+    const isPolicyError =
+      lowerText.includes('safety') ||
+      lowerText.includes('prohibited') ||
+      lowerText.includes('policy') ||
+      lowerText.includes('harm') ||
+      lowerText.includes('blocked')
+    console.error('[imagen] Gemini HTTP error', res.status, responseText.slice(0, 500))
+    if (isPolicyError) {
+      const err = new Error('Conteúdo bloqueado pelas políticas de uso da IA.')
+      ;(err as Error & { policyViolation: boolean }).policyViolation = true
+      throw err
+    }
+    throw new Error(`Gemini API error ${res.status}: ${responseText}`)
   }
 
-  const data = await res.json()
-  const candidate = data.candidates?.[0]
+  let data: Record<string, unknown>
+  try {
+    data = JSON.parse(responseText)
+  } catch {
+    throw new Error(`Gemini resposta inválida: ${responseText.slice(0, 200)}`)
+  }
 
-  if (!candidate) throw new Error('Gemini não retornou candidatos')
-
-  const POLICY_REASONS = ['SAFETY', 'PROHIBITED_CONTENT', 'IMAGE_SAFETY', 'RECITATION']
-  if (POLICY_REASONS.includes(candidate.finishReason)) {
+  // Bloqueio no nível do prompt (antes de gerar)
+  const blockReason = (data.promptFeedback as Record<string, unknown> | undefined)?.blockReason as string | undefined
+  if (blockReason) {
+    console.warn('[imagen] Gemini promptFeedback.blockReason:', blockReason)
     const err = new Error('Conteúdo bloqueado pelas políticas de uso da IA.')
     ;(err as Error & { policyViolation: boolean }).policyViolation = true
     throw err
   }
 
-  const imagePart = candidate.content?.parts?.find(
-    (p: GeminiPart) => p.inlineData?.mimeType?.startsWith('image/')
-  )
+  const candidate = (data.candidates as unknown[])?.[0] as Record<string, unknown> | undefined
 
-  if (!imagePart?.inlineData) throw new Error('Gemini não retornou imagem')
+  // Sem candidatos — log completo para diagnóstico
+  if (!candidate) {
+    console.warn('[imagen] Gemini sem candidatos. Resposta completa:', JSON.stringify(data).slice(0, 1000))
+    throw new Error('Gemini não retornou candidatos')
+  }
+
+  const POLICY_REASONS = ['SAFETY', 'PROHIBITED_CONTENT', 'IMAGE_SAFETY', 'RECITATION', 'BLOCKLIST', 'OTHER']
+  const finishReason = candidate.finishReason as string | undefined
+  console.log('[imagen] finishReason:', finishReason)
+  if (finishReason && POLICY_REASONS.includes(finishReason) && finishReason !== 'STOP') {
+    const err = new Error('Conteúdo bloqueado pelas políticas de uso da IA.')
+    ;(err as Error & { policyViolation: boolean }).policyViolation = true
+    throw err
+  }
+
+  const parts = ((candidate.content as Record<string, unknown> | undefined)?.parts ?? []) as GeminiPart[]
+  const imagePart = parts.find((p) => p.inlineData?.mimeType?.startsWith('image/'))
+
+  if (!imagePart?.inlineData) {
+    console.warn('[imagen] Gemini sem imagem. finishReason:', finishReason, 'parts:', JSON.stringify(parts).slice(0, 500))
+    // Se não há imagem e finishReason não é STOP, provavelmente é bloqueio
+    if (finishReason && finishReason !== 'STOP') {
+      const err = new Error('Conteúdo bloqueado pelas políticas de uso da IA.')
+      ;(err as Error & { policyViolation: boolean }).policyViolation = true
+      throw err
+    }
+    throw new Error('Gemini não retornou imagem')
+  }
 
   const tokensInput = data.usageMetadata?.promptTokenCount ?? 0
   const tokensOutput = data.usageMetadata?.candidatesTokenCount ?? 0
