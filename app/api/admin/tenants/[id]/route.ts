@@ -79,11 +79,9 @@ export async function DELETE(
     .select('id')
     .eq('tenant_id', id)
 
-  // Desvincula perfis do tenant antes de excluir (FK sem CASCADE)
-  await admin
-    .from('profiles')
-    .update({ tenant_id: null })
-    .eq('tenant_id', id)
+  // Remove tabelas sem CASCADE antes de excluir o tenant
+  await admin.from('payment_events').delete().eq('tenant_id', id)
+  await admin.from('profiles').update({ tenant_id: null }).eq('tenant_id', id)
 
   // Exclui o tenant — cascade remove subscriptions, memberships, imagens etc.
   const { error: deleteError } = await admin
