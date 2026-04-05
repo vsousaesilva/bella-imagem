@@ -73,8 +73,8 @@ export async function POST(request: Request) {
           })
           .eq('tenant_id', tenantId)
 
-        // Envia e-mail para o admin do tenant definir sua senha
-        await sendPasswordSetupEmail(admin, tenantId)
+        // Envia e-mail de boas-vindas com link de criação de senha
+        await sendWelcomeEmailToTenant(admin, tenantId, plan)
 
         console.log(`[asaas-webhook] Pagamento confirmado — tenant:${tenantId} plan:${plan}`)
         break
@@ -155,39 +155,47 @@ export async function POST(request: Request) {
 
 // ── helpers ──
 
-async function sendPasswordSetupEmail(
+async function sendWelcomeEmailToTenant(
   admin: ReturnType<typeof import('@/lib/supabase/server')['createAdminClient']>,
-  tenantId: string
+  tenantId: string,
+  plan: PlanType
 ) {
   try {
-    // Busca o perfil administrador do tenant
     const { data: profile } = await admin
       .from('profiles')
-      .select('id')
+      .select('id, full_name')
       .eq('tenant_id', tenantId)
       .eq('role', 'administrador')
       .single()
 
     if (!profile) return
 
-    // Busca o e-mail do usuário
     const { data: authUser } = await admin.auth.admin.getUserById(profile.id)
     const email = authUser?.user?.email
     if (!email) return
 
-    // Envia e-mail de redefinição de senha via Supabase (cliente anon — dispara o envio de e-mail)
-    const { createClient } = await import('@supabase/supabase-js')
-    const anon = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    await anon.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://bellaimagem.ia.br/auth/callback?next=/dashboard',
+    // Gera link de criação de senha via Supabase Admin (sem enviar e-mail pelo Supabase)
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo: 'https://bellaimagem.ia.br/auth/callback?next=/dashboard' },
     })
 
-    console.log(`[asaas-webhook] E-mail de senha enviado para tenant:${tenantId}`)
+    if (linkError || !linkData?.properties?.action_link) {
+      console.error('[asaas-webhook] Erro ao gerar link de senha:', linkError)
+      return
+    }
+
+    const { sendWelcomeEmail } = await import('@/lib/email')
+    await sendWelcomeEmail({
+      to: email,
+      name: profile.full_name ?? email,
+      plan,
+      passwordLink: linkData.properties.action_link,
+    })
+
+    console.log(`[asaas-webhook] E-mail de boas-vindas enviado — tenant:${tenantId}`)
   } catch (err) {
-    // Não bloqueia o fluxo — pode ser retentado manualmente se necessário
-    console.error('[asaas-webhook] Erro ao enviar e-mail de senha:', err)
+    console.error('[asaas-webhook] Erro ao enviar e-mail de boas-vindas:', err)
   }
 }

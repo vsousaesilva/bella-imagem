@@ -127,7 +127,7 @@ export async function POST(request: Request) {
 
     // Plano gratuito: re-enviar e-mail de senha e redirecionar
     if (typedPlan === 'free') {
-      await sendPasswordSetupEmail(email)
+      await sendPasswordSetupEmail(email, existingUser.user_metadata?.full_name ?? name, admin)
       return NextResponse.json({ checkoutUrl: `${APP_URL}/bem-vindo?plan=free` })
     }
 
@@ -193,7 +193,7 @@ export async function POST(request: Request) {
 
   // Plano gratuito: não precisa de pagamento — envia e-mail de definição de senha
   if (typedPlan === 'free') {
-    await sendPasswordSetupEmail(email)
+    await sendPasswordSetupEmail(email, nameCheck.sanitized, admin)
     return NextResponse.json({ checkoutUrl: `${APP_URL}/bem-vindo?plan=free` })
   }
 
@@ -297,18 +297,26 @@ async function gerarLinkPagamento({
 
 // ── helpers ──
 
-async function sendPasswordSetupEmail(email: string) {
+async function sendPasswordSetupEmail(email: string, name: string, adminClient: ReturnType<typeof createAdminClient>) {
   try {
-    const { createClient } = await import('@supabase/supabase-js')
-    const anon = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    await anon.auth.resetPasswordForEmail(email, {
-      redirectTo: `${APP_URL}/auth/callback?next=/dashboard`,
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo: `${APP_URL}/auth/callback?next=/dashboard` },
+    })
+
+    if (linkError || !linkData?.properties?.action_link) {
+      console.error('[checkout] Erro ao gerar link de senha:', linkError)
+      return
+    }
+
+    const { sendFreeWelcomeEmail } = await import('@/lib/email')
+    await sendFreeWelcomeEmail({
+      to: email,
+      name,
+      passwordLink: linkData.properties.action_link,
     })
   } catch (err) {
-    // Não bloqueia o fluxo se o e-mail falhar
     console.error('[checkout] Erro ao enviar e-mail de senha:', err)
   }
 }
