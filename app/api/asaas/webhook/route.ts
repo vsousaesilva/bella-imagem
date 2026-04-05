@@ -178,7 +178,7 @@ async function sendWelcomeEmailToTenant(
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
       email,
-      options: { redirectTo: 'https://bellaimagem.ia.br/auth/callback?next=/dashboard' },
+      options: { redirectTo: 'https://bellaimagem.ia.br/auth/confirm' },
     })
 
     if (linkError || !linkData?.properties?.action_link) {

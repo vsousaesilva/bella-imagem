@@ -336,7 +336,7 @@ async function sendPasswordSetupEmail(email: string, name: string, adminClient: 
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: 'recovery',
       email,
-      options: { redirectTo: `${APP_URL}/auth/callback?next=/dashboard` },
+      options: { redirectTo: `${APP_URL}/auth/confirm` },
     })
 
     if (linkError || !linkData?.properties?.action_link) {
