@@ -141,7 +141,7 @@ function RegisterForm() {
             <p className="text-[10px] tracking-[0.3em] uppercase text-bella-gold font-body">
               Plano selecionado
             </p>
-            <p className="text-bella-white font-display font-medium mt-0.5">
+            <p className="font-display font-medium mt-0.5" style={{ color: '#fefefe' }}>
               {PLAN_LABELS[plan]}
             </p>
           </div>
