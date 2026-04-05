@@ -66,7 +66,7 @@ export default function AfiliadoRegistroPage() {
           {success ? (
             <div className="text-center py-4">
               <CheckCircle className="w-12 h-12 mx-auto mb-4" style={{ color: '#4ade80' }} />
-              <h2 className="text-lg font-display font-medium text-bella-white mb-2">Cadastro realizado!</h2>
+              <h2 className="text-lg font-display font-medium mb-2" style={{ color: '#ffffff' }}>Cadastro realizado!</h2>
               <p className="text-sm text-bella-gray leading-relaxed">
                 Verifique seu e-mail para criar sua senha e acessar o painel de afiliado.
               </p>
