@@ -60,7 +60,7 @@ export default async function AfiliadoDashboardPage() {
   const paidCommission = safeReferrals.filter(r => r.status === 'paid').reduce((s, r) => s + (r.commission_brl ?? 0), 0)
   const pendingCommission = safeReferrals.filter(r => r.status === 'pending').reduce((s, r) => s + (r.commission_brl ?? 0), 0)
 
-  const referralLink = `${APP_URL}/register?ref=${affiliate.code}`
+  const referralLink = `${APP_URL}/planos?ref=${affiliate.code}`
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
