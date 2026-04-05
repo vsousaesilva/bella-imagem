@@ -178,10 +178,6 @@ export async function POST(request: Request) {
       cycle: 'MONTHLY',
       description: `Bella Imagem — Plano ${PLAN_LABELS[typedPlan]}`,
       externalReference: tenantId,
-      callback: {
-        successUrl: `${APP_URL}/bem-vindo?plan=${typedPlan}`,
-        autoRedirect: true,
-      },
     })
     asaasSubscriptionId = subscription.id
   } catch (err) {
