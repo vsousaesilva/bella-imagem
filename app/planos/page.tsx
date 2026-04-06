@@ -83,7 +83,7 @@ export default async function PlanosPage({
   return (
     <div
       className="min-h-screen flex flex-col items-center px-4 py-12 relative overflow-hidden"
-      style={{ background: '#0a0a0a' }}
+      style={{ background: 'var(--main-bg)' }}
     >
       {/* Gradiente de fundo */}
       <div
@@ -129,7 +129,7 @@ export default async function PlanosPage({
               style={
                 plan.highlight
                   ? { background: 'rgba(201,169,110,0.07)', border: '1px solid rgba(201,169,110,0.35)' }
-                  : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }
+                  : { background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }
               }
             >
               {plan.popular && (
@@ -170,7 +170,7 @@ export default async function PlanosPage({
                 style={
                   plan.highlight
                     ? { background: '#c9a96e', color: '#0a0a0a' }
-                    : { background: 'rgba(255,255,255,0.06)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.1)' }
+                    : { background: 'var(--main-bg-subtle)', color: 'var(--main-text)', border: '1px solid var(--main-border)' }
                 }
               >
                 {plan.cta}
@@ -182,7 +182,7 @@ export default async function PlanosPage({
         {/* Plano gratuito — menos destaque */}
         <div
           className="rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-          style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)' }}
+          style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
         >
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-bella-gray mb-0.5">Gratuito</p>

@@ -34,14 +34,11 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: '#0a0a0a',
-        '--main-text': '#fefefe',
-        '--main-text-sub': '#6b6b6b',
-        '--main-text-muted': '#b0b0b0',
+        background: 'var(--main-bg)',
       } as React.CSSProperties}
     >
       {/* Header */}
-      <header style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <header style={{ borderBottom: '1px solid var(--main-border)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <NextImage src="/logo.png" alt="Bella Imagem" width={130} height={40} className="object-contain" />
@@ -69,7 +66,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       </main>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <footer style={{ borderTop: '1px solid var(--main-border)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 sm:col-span-1">

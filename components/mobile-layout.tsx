@@ -18,14 +18,14 @@ export function MobileLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#0a0a0a', '--main-bg': '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-bg-subtle': 'rgba(255,255,255,0.02)', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)', '--main-border': 'rgba(255,255,255,0.06)', '--main-hover-bg': 'rgba(255,255,255,0.04)' } as React.CSSProperties}>
+    <div className="flex min-h-screen" style={{ background: 'var(--main-bg)' } as React.CSSProperties}>
       <Sidebar
         profile={profile}
         tenant={tenant}
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
       />
-      <div className="flex-1 flex flex-col min-w-0" style={{ background: '#0a0a0a' }}>
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar — hidden on md+ */}
         <header
           className="md:hidden flex items-center gap-3 px-4 py-3 flex-shrink-0 sidebar-dark"
@@ -48,7 +48,7 @@ export function MobileLayout({
             priority
           />
         </header>
-        <main className="flex-1 overflow-auto" style={{ background: '#0a0a0a' }}>
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

@@ -37,7 +37,7 @@ export default async function MasterBlogPage() {
         </Link>
       </div>
 
-      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--main-border)' }}>
         {safePosts.length === 0 ? (
           <div className="px-5 py-16 text-center">
             <p className="text-bella-gray text-sm mb-4">Nenhum artigo publicado ainda.</p>
@@ -54,7 +54,7 @@ export default async function MasterBlogPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
+            <tbody className="divide-y" style={{ borderColor: 'var(--main-border)' }}>
               {safePosts.map(post => (
                 <tr key={post.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-4 py-3">

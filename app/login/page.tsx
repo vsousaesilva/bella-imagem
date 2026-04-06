@@ -31,7 +31,7 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)' } as React.CSSProperties}
+      style={{ background: 'var(--main-bg)' } as React.CSSProperties}
     >
       {/* Mesh gradient */}
       <div
@@ -75,8 +75,8 @@ export default function LoginPage() {
         <div
           className="rounded-2xl p-6 sm:p-8"
           style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--main-bg-subtle)',
+            border: '1px solid var(--main-border)',
           }}
         >
           <h1 className="text-lg font-display font-medium text-bella-white mb-6">

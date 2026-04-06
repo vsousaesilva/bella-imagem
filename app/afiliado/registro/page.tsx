@@ -39,7 +39,7 @@ export default function AfiliadoRegistroPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)' } as React.CSSProperties}
+      style={{ background: 'var(--main-bg)' } as React.CSSProperties}
     >
       <div
         className="absolute inset-0 pointer-events-none"
@@ -61,12 +61,12 @@ export default function AfiliadoRegistroPage() {
 
         <div
           className="rounded-2xl p-6 sm:p-8"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
         >
           {success ? (
             <div className="text-center py-4">
               <CheckCircle className="w-12 h-12 mx-auto mb-4" style={{ color: '#4ade80' }} />
-              <h2 className="text-lg font-display font-medium mb-2" style={{ color: '#ffffff' }}>Cadastro realizado!</h2>
+              <h2 className="text-lg font-display font-medium mb-2 text-bella-white">Cadastro realizado!</h2>
               <p className="text-sm text-bella-gray leading-relaxed">
                 Verifique seu e-mail para criar sua senha e acessar o painel de afiliado.
               </p>

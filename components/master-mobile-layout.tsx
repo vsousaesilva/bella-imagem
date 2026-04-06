@@ -19,7 +19,7 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname()
 
   return (
-    <div className="flex min-h-screen bg-bella-black" style={{ '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-bg': '#0a0a0a', '--main-bg-subtle': 'rgba(255,255,255,0.02)', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)', '--main-border': 'rgba(255,255,255,0.06)', '--main-hover-bg': 'rgba(255,255,255,0.04)' } as React.CSSProperties}>
+    <div className="flex min-h-screen" style={{ background: 'var(--main-bg)' } as React.CSSProperties}>
       {/* Backdrop */}
       {sidebarOpen && (
         <div
@@ -91,7 +91,7 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0" style={{ background: '#0a0a0a' }}>
+      <div className="flex-1 flex flex-col min-w-0" style={{ background: 'var(--main-bg)' }}>
         {/* Mobile header */}
         <header
           className="md:hidden flex items-center gap-3 px-4 py-3 flex-shrink-0"
@@ -106,10 +106,10 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
           </button>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-bella-gold" />
-            <span className="text-sm font-medium text-bella-white">Painel Master</span>
+            <span className="text-sm font-medium" style={{ color: '#fefefe' }}>Painel Master</span>
           </div>
         </header>
-        <main className="flex-1 overflow-auto" style={{ background: '#0a0a0a' }}>{children}</main>
+        <main className="flex-1 overflow-auto" style={{ background: 'var(--main-bg)' }}>{children}</main>
       </div>
     </div>
   )

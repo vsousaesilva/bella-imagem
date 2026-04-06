@@ -64,9 +64,9 @@ export default async function AfiliadoDashboardPage() {
   const referralLink = `${APP_URL}/planos?ref=${affiliate.code}`
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a', '--main-text': '#fefefe', '--main-text-sub': '#6b6b6b', '--main-text-muted': '#b0b0b0', '--main-input-bg': 'rgba(255,255,255,0.04)', '--main-input-border': 'rgba(255,255,255,0.1)' } as React.CSSProperties}>
+    <div className="min-h-screen" style={{ background: 'var(--main-bg)' } as React.CSSProperties}>
       {/* Header */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ background: 'var(--main-bg-subtle)', borderBottom: '1px solid var(--main-border)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <NextImage src="/logo.png" alt="Bella Imagem" width={140} height={42} className="object-contain" />
           <div className="flex items-center gap-4">
@@ -114,7 +114,7 @@ export default async function AfiliadoDashboardPage() {
             <div
               key={kpi.label}
               className="rounded-xl p-4"
-              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
             >
               <kpi.icon className="w-4 h-4 mb-2" style={{ color: '#c9a96e' }} />
               <p className="text-xl font-bold" style={{ color: '#ffffff' }}>{kpi.value}</p>
@@ -126,9 +126,9 @@ export default async function AfiliadoDashboardPage() {
         {/* Histórico de conversões */}
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ border: '1px solid var(--main-border)' }}
         >
-          <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--main-border)' }}>
             <h2 className="text-sm font-semibold text-bella-white">Histórico de conversões</h2>
           </div>
 
@@ -138,7 +138,7 @@ export default async function AfiliadoDashboardPage() {
               <p className="text-bella-gray text-xs mt-1">Compartilhe seu link para começar a ganhar!</p>
             </div>
           ) : (
-            <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+            <div className="divide-y" style={{ borderColor: 'var(--main-border)' }}>
               {safeReferrals.map(r => (
                 <div key={r.id} className="px-5 py-4 flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -172,7 +172,7 @@ export default async function AfiliadoDashboardPage() {
           {paidCommission > 0 && (
             <div
               className="px-5 py-3 flex justify-between text-sm"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(201,169,110,0.04)' }}
+              style={{ borderTop: '1px solid var(--main-border)', background: 'rgba(201,169,110,0.04)' }}
             >
               <span className="text-bella-gray">Total já pago</span>
               <span className="font-semibold" style={{ color: '#c9a96e' }}>{fmtBrl(paidCommission)}</span>

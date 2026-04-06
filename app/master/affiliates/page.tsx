@@ -87,7 +87,7 @@ export default async function MasterAffiliatesPage() {
           { icon: DollarSign, label: 'Comissão acumulada', value: fmtBrl(totalCommission) },
           { icon: CheckCircle, label: 'Conversões pendentes', value: safeReferrals.filter(r => r.status === 'pending').length.toString() },
         ].map(kpi => (
-          <div key={kpi.label} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div key={kpi.label} className="rounded-xl p-4" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
             <kpi.icon className="w-4 h-4 mb-2" style={{ color: '#c9a96e' }} />
             <p className="text-xl font-bold text-bella-white">{kpi.value}</p>
             <p className="text-[11px] text-bella-gray mt-0.5">{kpi.label}</p>
@@ -96,8 +96,8 @@ export default async function MasterAffiliatesPage() {
       </div>
 
       {/* Tabela de afiliados */}
-      <div className="rounded-2xl overflow-hidden mb-8" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="rounded-2xl overflow-hidden mb-8" style={{ border: '1px solid var(--main-border)' }}>
+        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--main-border)' }}>
           <h2 className="text-sm font-semibold text-bella-white">Afiliados</h2>
           <span className="text-xs text-bella-gray">{safeAffiliates.length} cadastrados</span>
         </div>
@@ -116,7 +116,7 @@ export default async function MasterAffiliatesPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
+              <tbody className="divide-y" style={{ borderColor: 'var(--main-border)' }}>
                 {safeAffiliates.map(a => {
                   const s = statsMap[a.id]
                   return (
@@ -143,8 +143,8 @@ export default async function MasterAffiliatesPage() {
       </div>
 
       {/* Tabela de conversões recentes */}
-      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--main-border)' }}>
+        <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--main-border)' }}>
           <h2 className="text-sm font-semibold text-bella-white">Conversões recentes</h2>
         </div>
 
@@ -162,7 +162,7 @@ export default async function MasterAffiliatesPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
+              <tbody className="divide-y" style={{ borderColor: 'var(--main-border)' }}>
                 {safeReferrals.slice(0, 50).map(r => {
                   const aff = safeAffiliates.find(a => a.id === r.affiliate_id)
                   return (
