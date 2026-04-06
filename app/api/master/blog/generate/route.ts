@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 
+export const maxDuration = 60 // segundos — geração de artigo é lenta
+
 const GEMINI_TEXT_MODEL = 'gemini-2.5-flash'
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 
@@ -75,7 +77,6 @@ Lembre-se: a Bella Imagem é uma plataforma que usa IA para gerar fotos profissi
     generationConfig: {
       temperature: 0.85,
       maxOutputTokens: 4096,
-      responseMimeType: 'application/json',
     },
   }
 
