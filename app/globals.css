@@ -159,13 +159,14 @@ html.light {
   .sidebar-dark * { color: inherit; }
 
   /* ── Conteúdo do blog (HTML gerado pelo master) ── */
-  .blog-content h1, .blog-content h2, .blog-content h3 { color: var(--main-text); font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; }
-  .blog-content h1 { font-size: 1.5rem; }
-  .blog-content h2 { font-size: 1.25rem; }
-  .blog-content h3 { font-size: 1.1rem; }
-  .blog-content p  { margin-bottom: 1rem; }
-  .blog-content ul, .blog-content ol { padding-left: 1.5rem; margin-bottom: 1rem; }
-  .blog-content li { margin-bottom: 0.25rem; }
+  .blog-content { font-size: 1.0625rem; line-height: 1.8; }
+  .blog-content h1, .blog-content h2, .blog-content h3 { color: var(--main-text); font-weight: 600; margin-top: 2.25rem; margin-bottom: 0.875rem; }
+  .blog-content h1 { font-size: 1.75rem; }
+  .blog-content h2 { font-size: 1.4rem; }
+  .blog-content h3 { font-size: 1.2rem; }
+  .blog-content p  { margin-bottom: 1.25rem; }
+  .blog-content ul, .blog-content ol { padding-left: 1.75rem; margin-bottom: 1.25rem; }
+  .blog-content li { margin-bottom: 0.4rem; }
   .blog-content strong { color: var(--main-text); }
   .blog-content a  { color: #c9a96e; text-decoration: underline; }
   .blog-content img { border-radius: 0.75rem; max-width: 100%; margin: 1.5rem 0; }
