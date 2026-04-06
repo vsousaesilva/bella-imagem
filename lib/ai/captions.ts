@@ -110,7 +110,7 @@ Gere a legenda completa para o post de ${platform}.`
     contents: [{ role: 'user', parts: userParts }],
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 8192,
     },
   }
 
