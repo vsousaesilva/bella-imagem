@@ -91,7 +91,7 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0" style={{ background: '#0a0a0a' }}>
         {/* Mobile header */}
         <header
           className="md:hidden flex items-center gap-3 px-4 py-3 flex-shrink-0"
@@ -109,7 +109,7 @@ export function MasterMobileLayout({ children }: { children: React.ReactNode }) 
             <span className="text-sm font-medium text-bella-white">Painel Master</span>
           </div>
         </header>
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto" style={{ background: '#0a0a0a' }}>{children}</main>
       </div>
     </div>
   )

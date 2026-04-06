@@ -10,9 +10,10 @@ const NAV_LINKS = [
 
 const FOOTER_LINKS = {
   Produto: [
-    { href: '/planos',   label: 'Planos e preços' },
-    { href: '/register', label: 'Criar conta' },
-    { href: '/login',    label: 'Entrar' },
+    { href: '/planos',          label: 'Planos e preços' },
+    { href: '/register',        label: 'Criar conta' },
+    { href: '/login',           label: 'Entrar' },
+    { href: '/afiliado/registro', label: 'Programa de afiliados' },
   ],
   Empresa: [
     { href: '/sobre',     label: 'Sobre nós' },

@@ -25,7 +25,7 @@ export function MobileLayout({
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0" style={{ background: '#0a0a0a' }}>
         {/* Mobile top bar — hidden on md+ */}
         <header
           className="md:hidden flex items-center gap-3 px-4 py-3 flex-shrink-0 sidebar-dark"
@@ -48,7 +48,7 @@ export function MobileLayout({
             priority
           />
         </header>
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto" style={{ background: '#0a0a0a' }}>
           {children}
         </main>
       </div>

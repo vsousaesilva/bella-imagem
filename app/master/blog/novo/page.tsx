@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Sparkles } from 'lucide-react'
 
 export default function MasterBlogNovoPage() {
   const router = useRouter()
@@ -13,7 +13,27 @@ export default function MasterBlogNovoPage() {
   const [coverUrl, setCoverUrl] = useState('')
   const [published, setPublished] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  async function handleGenerate() {
+    setGenerating(true)
+    setError(null)
+
+    const res = await fetch('/api/master/blog/generate', { method: 'POST' })
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error ?? 'Erro ao gerar artigo.')
+      setGenerating(false)
+      return
+    }
+
+    setTitle(data.title ?? '')
+    setExcerpt(data.excerpt ?? '')
+    setContent(data.content ?? '')
+    setGenerating(false)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -39,12 +59,35 @@ export default function MasterBlogNovoPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-3xl mx-auto">
-      <div className="mb-8">
-        <Link href="/master/blog" className="text-xs text-bella-gray hover:text-bella-gray-light transition-colors mb-3 inline-block">
-          ← Voltar ao blog
-        </Link>
-        <h1 className="text-2xl font-display font-bold tracking-tight text-bella-white">Novo artigo</h1>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <Link href="/master/blog" className="text-xs text-bella-gray hover:text-bella-gray-light transition-colors mb-3 inline-block">
+            ← Voltar ao blog
+          </Link>
+          <h1 className="text-2xl font-display font-bold tracking-tight text-bella-white">Novo artigo</h1>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generating || saving}
+          className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all flex-shrink-0 mt-6 disabled:opacity-60"
+          style={{ background: 'rgba(201,169,110,0.12)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }}
+        >
+          <Sparkles className="w-4 h-4" />
+          {generating ? 'Gerando...' : 'Gerar com IA'}
+        </button>
       </div>
+
+      {generating && (
+        <div
+          className="mb-6 flex items-center gap-3 px-4 py-4 rounded-xl text-sm"
+          style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.2)' }}
+        >
+          <Sparkles className="w-4 h-4 text-bella-gold animate-pulse flex-shrink-0" />
+          <span className="text-bella-gray">A IA está escolhendo um tema de moda e escrevendo o artigo completo...</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -119,7 +162,7 @@ export default function MasterBlogNovoPage() {
         )}
 
         <div className="flex gap-3">
-          <button type="submit" disabled={saving} className="btn-primary px-8">
+          <button type="submit" disabled={saving || generating} className="btn-primary px-8">
             {saving ? 'Salvando...' : published ? 'Publicar artigo' : 'Salvar rascunho'}
           </button>
           <Link href="/master/blog" className="btn-secondary px-6">
