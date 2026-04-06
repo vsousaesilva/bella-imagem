@@ -48,6 +48,7 @@ export default async function BemVindoPage({ searchParams }: PageProps) {
               priority
             />
           </div>
+        </div>
 
         {/* Ícone de sucesso */}
         <div className="flex justify-center mb-6">
