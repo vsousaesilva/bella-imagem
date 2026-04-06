@@ -35,15 +35,26 @@ export default async function GaleriaPage({
   }
 
   // #11 — Paginação com count
-  const { data: images, count, error } = await admin
-    .from('generated_images')
-    .select('*', { count: 'exact' })
-    .eq('tenant_id', profile.tenant_id)
-    .eq('status', 'completed')
-    .order('created_at', { ascending: false })
-    .range(offset, offset + PAGE_SIZE - 1)
+  const [{ data: images, count, error }, { data: tenant }] = await Promise.all([
+    admin
+      .from('generated_images')
+      .select('*', { count: 'exact' })
+      .eq('tenant_id', profile.tenant_id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1),
+    admin
+      .from('tenants')
+      .select('plan, instagram_account_id')
+      .eq('id', profile.tenant_id)
+      .single(),
+  ])
 
   if (error) console.error('[galeria] erro ao buscar imagens:', error.message)
+
+  const canPublishInstagram =
+    !!tenant?.instagram_account_id &&
+    ['pro', 'business'].includes(tenant?.plan ?? '')
 
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE)
 
@@ -76,7 +87,7 @@ export default async function GaleriaPage({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {(images as GeneratedImage[]).map((img) => (
-            <GaleriaCard key={img.id} img={img} />
+            <GaleriaCard key={img.id} img={img} canPublishInstagram={canPublishInstagram} />
           ))}
         </div>
       )}

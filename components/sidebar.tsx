@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Sparkles,
   X,
+  BarChart3,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -123,6 +124,26 @@ export function Sidebar({ profile, tenant, mobileOpen = false, onMobileClose }: 
               </Link>
             )
           })}
+
+          {tenant?.plan === 'business' && (
+            <Link
+              href="/relatorios"
+              onClick={onMobileClose}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
+                pathname === '/relatorios' ? 'font-medium' : 'hover:bg-white/5'
+              )}
+              style={pathname === '/relatorios'
+                ? { background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.15)', color: '#c9a96e' }
+                : { border: '1px solid transparent', color: '#8a8a8a' }
+              }
+              onMouseEnter={(e) => { if (pathname !== '/relatorios') e.currentTarget.style.color = '#fefefe' }}
+              onMouseLeave={(e) => { if (pathname !== '/relatorios') e.currentTarget.style.color = '#8a8a8a' }}
+            >
+              <BarChart3 className="w-4 h-4 flex-shrink-0" />
+              Relatórios
+            </Link>
+          )}
 
           {profile.role === 'master' && (
             <Link

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Tenant, TomDePele, Biotipo, FaixaEtaria, GeneroModelo } from '@/lib/types'
-import { AlertCircle, CheckCircle2, Save, User } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Save, User, Instagram, Link2, Link2Off } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TOM_OPTIONS: Array<{ value: TomDePele; label: string }> = [
@@ -37,6 +38,7 @@ const TONE_OPTIONS = [
 
 export default function ConfiguracoesPage() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
   const [tenant, setTenant] = useState<Tenant | null>(null)
   const [profileId, setProfileId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -44,6 +46,8 @@ export default function ConfiguracoesPage() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
   const [profileFeedback, setProfileFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const [igFeedback, setIgFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const [disconnecting, setDisconnecting] = useState(false)
 
   const [fullName, setFullName] = useState('')
   const [businessName, setBusinessName] = useState('')
@@ -55,6 +59,30 @@ export default function ConfiguracoesPage() {
   const [faixaEtaria, setFaixaEtaria] = useState<FaixaEtaria>('26_35')
   const [genero, setGenero] = useState<GeneroModelo>('feminino')
   const [modelDescricao, setModelDescricao] = useState('')
+
+  useEffect(() => {
+    // Handle Instagram OAuth feedback from URL params
+    const igSuccess = searchParams.get('ig_success')
+    const igError = searchParams.get('ig_error')
+    if (igSuccess) {
+      setIgFeedback({ type: 'success', msg: 'Instagram conectado com sucesso!' })
+    } else if (igError) {
+      const errorMessages: Record<string, string> = {
+        plan: 'Seu plano não permite integração com Instagram.',
+        config: 'Configuração de app ausente. Contate o suporte.',
+        denied: 'Permissão negada pelo usuário.',
+        missing_params: 'Parâmetros de retorno inválidos.',
+        invalid_state: 'Estado de segurança inválido. Tente novamente.',
+        token_exchange: 'Falha ao obter token de acesso.',
+        pages_fetch: 'Não foi possível buscar suas páginas do Facebook.',
+        no_pages: 'Nenhuma página do Facebook encontrada na conta.',
+        no_ig_account: 'Nenhuma conta do Instagram Business vinculada à sua página do Facebook.',
+        db_update: 'Erro ao salvar credenciais. Tente novamente.',
+        unexpected: 'Erro inesperado. Tente novamente.',
+      }
+      setIgFeedback({ type: 'error', msg: errorMessages[igError] ?? 'Erro desconhecido.' })
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function load() {
@@ -141,6 +169,20 @@ export default function ConfiguracoesPage() {
     }
   }
 
+  async function handleDisconnectInstagram() {
+    setDisconnecting(true)
+    setIgFeedback(null)
+    const res = await fetch('/api/instagram/disconnect', { method: 'POST' })
+    const data = await res.json()
+    setDisconnecting(false)
+    if (!res.ok) {
+      setIgFeedback({ type: 'error', msg: data.error ?? 'Erro ao desconectar.' })
+    } else {
+      setTenant(prev => prev ? { ...prev, instagram_access_token: null, instagram_account_id: null } : prev)
+      setIgFeedback({ type: 'success', msg: 'Instagram desconectado.' })
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-4 sm:p-8">
@@ -197,6 +239,68 @@ export default function ConfiguracoesPage() {
           <span>{savingProfile ? 'Salvando...' : 'Salvar nome'}</span>
         </button>
       </section>
+
+      {/* Instagram integration — Pro / Business only */}
+      {tenant && ['pro', 'business'].includes(tenant.plan) && (
+        <section className="rounded-2xl p-6 mb-6" style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Instagram className="w-4 h-4 text-bella-gold" />
+            <h2 className="font-medium text-bella-white">Instagram</h2>
+          </div>
+          <p className="text-[11px] text-bella-gray mb-5">
+            Conecte sua conta do Instagram Business para publicar imagens diretamente da galeria.
+          </p>
+
+          {igFeedback && (
+            <div
+              className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl mb-4"
+              style={igFeedback.type === 'success'
+                ? { background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80' }
+                : { background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }
+              }
+            >
+              {igFeedback.type === 'success'
+                ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                : <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              }
+              {igFeedback.msg}
+            </div>
+          )}
+
+          {tenant.instagram_account_id ? (
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+                  style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80' }}
+                >
+                  <Link2 className="w-3 h-3" />
+                  Conectado
+                </span>
+                <span className="text-xs text-bella-gray">ID: {tenant.instagram_account_id}</span>
+              </div>
+              <button
+                onClick={handleDisconnectInstagram}
+                disabled={disconnecting}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all disabled:opacity-60"
+                style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }}
+              >
+                <Link2Off className="w-3 h-3" />
+                {disconnecting ? 'Desconectando...' : 'Desconectar'}
+              </button>
+            </div>
+          ) : (
+            <a
+              href="/api/instagram/connect"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+              style={{ background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e' }}
+            >
+              <Instagram className="w-4 h-4" />
+              Conectar Instagram
+            </a>
+          )}
+        </section>
+      )}
 
       {feedback && (
         <div

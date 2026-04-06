@@ -2,16 +2,28 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Download, ImageIcon, Copy, Check, X, FileText } from 'lucide-react'
+import { Download, ImageIcon, Copy, Check, X, FileText, Instagram, ExternalLink } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { GeneratedImage } from '@/lib/types'
 
-export function GaleriaCard({ img }: { img: GeneratedImage }) {
+interface GaleriaCardProps {
+  img: GeneratedImage
+  canPublishInstagram?: boolean
+}
+
+export function GaleriaCard({ img, canPublishInstagram = false }: GaleriaCardProps) {
   const displayUrl = img.selected_url ?? img.output_urls?.[0] ?? null
 
   const [downloading, setDownloading] = useState(false)
   const [captionOpen, setCaptionOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // Instagram publish state
+  const [igOpen, setIgOpen] = useState(false)
+  const [igCaption, setIgCaption] = useState(img.caption_generated ?? '')
+  const [igPublishing, setIgPublishing] = useState(false)
+  const [igError, setIgError] = useState<string | null>(null)
+  const [igPermalink, setIgPermalink] = useState<string | null>(img.instagram_permalink ?? null)
 
   async function handleDownload() {
     if (!displayUrl || downloading) return
@@ -37,13 +49,36 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  async function handlePublishInstagram() {
+    setIgPublishing(true)
+    setIgError(null)
+    try {
+      const res = await fetch('/api/instagram/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageId: img.id, caption: igCaption }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setIgError(data.error ?? 'Erro ao publicar.')
+        return
+      }
+      setIgPermalink(data.permalink ?? null)
+      setIgOpen(false)
+    } finally {
+      setIgPublishing(false)
+    }
+  }
+
+  const alreadyPosted = !!igPermalink
+
   return (
     <>
       <div
         className="group rounded-2xl overflow-hidden transition-all duration-300"
         style={{ background: 'var(--main-bg-subtle)', border: '1px solid var(--main-border)' }}
       >
-        {/* #8 — Imagem com sizes e sem unoptimized */}
+        {/* Image */}
         <div className="aspect-[4/5] relative" style={{ background: 'var(--main-bg-subtle)' }}>
           {displayUrl ? (
             <Image
@@ -59,7 +94,7 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
             </div>
           )}
 
-          {/* Overlay no hover */}
+          {/* Hover overlay */}
           <div
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3"
             style={{ background: 'rgba(0,0,0,0.55)' }}
@@ -79,7 +114,7 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
           </div>
         </div>
 
-        {/* Rodapé do card */}
+        {/* Card footer */}
         <div className="p-3">
           <p className="text-[11px] text-bella-gray">{formatDate(img.created_at)}</p>
 
@@ -94,20 +129,31 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
             </button>
           )}
 
-          {img.instagram_permalink && (
+          {alreadyPosted ? (
             <a
-              href={img.instagram_permalink}
+              href={igPermalink!}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] text-bella-gold mt-1 block hover:text-bella-gold-light transition-colors"
+              className="mt-1.5 flex items-center gap-1 text-[11px] transition-colors"
+              style={{ color: '#4ade80' }}
             >
-              Ver no Instagram
+              <ExternalLink className="w-3 h-3 flex-shrink-0" />
+              <span>Ver no Instagram</span>
             </a>
-          )}
+          ) : canPublishInstagram && displayUrl ? (
+            <button
+              onClick={() => { setIgCaption(img.caption_generated ?? ''); setIgError(null); setIgOpen(true) }}
+              className="mt-1.5 flex items-center gap-1 text-[11px] transition-colors"
+              style={{ color: '#c9a96e' }}
+            >
+              <Instagram className="w-3 h-3 flex-shrink-0" />
+              <span>Publicar no Instagram</span>
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {/* Modal de legenda */}
+      {/* Caption modal */}
       {captionOpen && img.caption_generated && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -147,6 +193,94 @@ export function GaleriaCard({ img }: { img: GeneratedImage }) {
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? 'Copiado!' : 'Copiar legenda'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Instagram publish modal */}
+      {igOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => !igPublishing && setIgOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4"
+            style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Instagram className="w-4 h-4" style={{ color: '#c9a96e' }} />
+                <h3 className="font-medium text-sm" style={{ color: '#fefefe' }}>Publicar no Instagram</h3>
+              </div>
+              {!igPublishing && (
+                <button
+                  onClick={() => setIgOpen(false)}
+                  style={{ color: '#6b6b6b' }}
+                  className="transition-colors hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wide mb-2" style={{ color: '#6b6b6b' }}>
+                Legenda (editável)
+              </label>
+              <textarea
+                value={igCaption}
+                onChange={(e) => setIgCaption(e.target.value)}
+                rows={8}
+                disabled={igPublishing}
+                className="w-full px-4 py-3 rounded-xl text-sm resize-none focus:outline-none"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fefefe',
+                }}
+              />
+              <p className="text-[11px] mt-1" style={{ color: '#6b6b6b' }}>
+                {igCaption.length}/2200 caracteres
+              </p>
+            </div>
+
+            {igError && (
+              <div
+                className="text-sm px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }}
+              >
+                {igError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={handlePublishInstagram}
+                disabled={igPublishing}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
+                style={{ background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.35)', color: '#c9a96e' }}
+              >
+                <Instagram className="w-4 h-4" />
+                {igPublishing ? 'Publicando...' : 'Publicar agora'}
+              </button>
+              {!igPublishing && (
+                <button
+                  onClick={() => setIgOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-sm transition-all"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#8a8a8a' }}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+
+            {igPublishing && (
+              <p className="text-[11px] text-center" style={{ color: '#6b6b6b' }}>
+                Isso pode levar até 60 segundos. Aguarde...
+              </p>
+            )}
           </div>
         </div>
       )}
