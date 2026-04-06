@@ -37,7 +37,7 @@ export default function CarreirasPage() {
             Não temos vagas abertas agora, mas adoramos receber candidaturas espontâneas de pessoas talentosas.
           </p>
           <a
-            href="mailto:contato@bellaimagem.com.br?subject=Candidatura espontânea"
+            href="mailto:suporte@usinadotempo.com.br?subject=Candidatura espontânea"
             className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
             style={{ background: '#c9a96e', color: '#0a0a0a' }}
           >

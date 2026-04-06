@@ -92,7 +92,7 @@ export default function SobrePage() {
             { label: 'Empresa', value: 'Usina do Tempo' },
             { label: 'CNPJ', value: '59.267.749/0001-42' },
             { label: 'Cidade', value: 'Fortaleza, Ceará — Brasil' },
-            { label: 'E-mail', value: 'contato@bellaimagem.com.br' },
+            { label: 'E-mail', value: 'suporte@usinadotempo.com.br' },
             { label: 'Telefone', value: '+55 85 99739-5183' },
             { label: 'Plataforma', value: 'bellaimagem.ia.br' },
           ].map(item => (

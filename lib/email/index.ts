@@ -243,6 +243,77 @@ export async function sendAffiliateWelcomeEmail({
   if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`)
 }
 
+// ── E-mail de contato do site ──
+
+export async function sendContactEmail({
+  name,
+  email,
+  subject,
+  message,
+}: {
+  name: string
+  email: string
+  subject: string
+  message: string
+}) {
+  const html = baseTemplate(`
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#fefefe;font-family:Georgia,serif;">
+      Nova mensagem de contato
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:#b0b0b0;line-height:1.6;">
+      Uma nova mensagem foi enviada pelo formulário de contato da Bella Imagem.
+    </p>
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px 24px;margin:0 0 24px;">
+      <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="font-size:11px;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.15em;padding:6px 0 2px;">Nome</td>
+          </tr>
+          <tr>
+            <td style="font-size:14px;color:#fefefe;padding:0 0 16px;font-weight:600;">${name}</td>
+          </tr>
+          <tr>
+            <td style="font-size:11px;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.15em;padding:6px 0 2px;">E-mail</td>
+          </tr>
+          <tr>
+            <td style="font-size:14px;padding:0 0 16px;">
+              <a href="mailto:${email}" style="color:#c9a96e;text-decoration:none;">${email}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size:11px;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.15em;padding:6px 0 2px;">Assunto</td>
+          </tr>
+          <tr>
+            <td style="font-size:14px;color:#fefefe;padding:0 0 16px;">${subject}</td>
+          </tr>
+          <tr>
+            <td style="font-size:11px;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.15em;padding:6px 0 2px;">Mensagem</td>
+          </tr>
+          <tr>
+            <td style="font-size:14px;color:#b0b0b0;line-height:1.7;white-space:pre-wrap;">${message}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <p style="margin:0;font-size:12px;color:#6b6b6b;line-height:1.6;">
+      Responda diretamente para <a href="mailto:${email}" style="color:#c9a96e;text-decoration:none;">${email}</a>
+    </p>
+  `)
+
+  const resend = getResend()
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: 'suporte@usinadotempo.com.br',
+    replyTo: email,
+    subject: `[Contato] ${subject}`,
+    html,
+  })
+
+  if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`)
+}
+
 // ── E-mail de conversão para afiliado ──
 
 export async function sendAffiliateConversionEmail({

@@ -61,7 +61,7 @@ export default function CookiesPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">6. Contato</h2>
-          <p>Dúvidas sobre esta política: <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a></p>
+          <p>Dúvidas sobre esta política: <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a></p>
         </section>
 
       </div>

@@ -11,7 +11,7 @@ export default function PrivacidadePage() {
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">1. Controlador dos Dados</h2>
           <p>A <strong className="text-bella-white">Usina do Tempo</strong> (CNPJ 59.267.749/0001-42), operadora da plataforma Bella Imagem (bellaimagem.ia.br), é a controladora dos dados pessoais coletados neste serviço, nos termos da Lei Geral de Proteção de Dados (Lei 13.709/2018 — LGPD).</p>
-          <p className="mt-2">Encarregado de Dados (DPO): <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a></p>
+          <p className="mt-2">Encarregado de Dados (DPO): <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a></p>
         </section>
 
         <section>
@@ -77,7 +77,7 @@ export default function PrivacidadePage() {
             <li>Obter portabilidade dos dados;</li>
             <li>Revogar consentimentos previamente concedidos.</li>
           </ul>
-          <p className="mt-3">Para exercer seus direitos, envie solicitação para <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a>. Responderemos em até 15 dias úteis.</p>
+          <p className="mt-3">Para exercer seus direitos, envie solicitação para <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a>. Responderemos em até 15 dias úteis.</p>
         </section>
 
         <section>
@@ -88,7 +88,7 @@ export default function PrivacidadePage() {
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">9. Contato</h2>
           <p>Dúvidas sobre privacidade:<br />
-            <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a><br />
+            <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a><br />
             +55 85 99739-5183
           </p>
         </section>

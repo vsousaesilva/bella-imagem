@@ -25,7 +25,7 @@ export default function TermosPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">4. Cadastro e Conta</h2>
-          <p>Você é responsável por manter a confidencialidade de suas credenciais de acesso e por todas as atividades realizadas em sua conta. Notifique-nos imediatamente caso suspeite de uso não autorizado da sua conta pelo e-mail <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a>.</p>
+          <p>Você é responsável por manter a confidencialidade de suas credenciais de acesso e por todas as atividades realizadas em sua conta. Notifique-nos imediatamente caso suspeite de uso não autorizado da sua conta pelo e-mail <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a>.</p>
         </section>
 
         <section>
@@ -70,7 +70,7 @@ export default function TermosPage() {
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">11. Contato</h2>
           <p>Para dúvidas sobre estes Termos, entre em contato:<br />
-            <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a><br />
+            <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a><br />
             +55 85 99739-5183
           </p>
         </section>

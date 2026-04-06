@@ -22,7 +22,7 @@ export default function LgpdPage() {
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">Encarregado de Dados (DPO)</h2>
           <p>O Encarregado pelo Tratamento de Dados Pessoais pode ser contactado pelo e-mail:</p>
-          <p className="mt-2"><a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a></p>
+          <p className="mt-2"><a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a></p>
         </section>
 
         <section>
@@ -49,7 +49,7 @@ export default function LgpdPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-bella-white mb-3">Como Exercer seus Direitos</h2>
-          <p>Envie sua solicitação para <a href="mailto:contato@bellaimagem.com.br" className="text-bella-gold hover:underline">contato@bellaimagem.com.br</a> informando:</p>
+          <p>Envie sua solicitação para <a href="mailto:suporte@usinadotempo.com.br" className="text-bella-gold hover:underline">suporte@usinadotempo.com.br</a> informando:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
             <li>Nome completo e e-mail cadastrado na plataforma;</li>
             <li>Direito que deseja exercer;</li>

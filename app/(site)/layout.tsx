@@ -101,8 +101,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               © {new Date().getFullYear()} Bella Imagem · Usina do Tempo · CNPJ 59.267.749/0001-42
             </p>
             <p className="text-[11px] text-bella-gray">
-              <a href="mailto:contato@bellaimagem.com.br" className="hover:text-bella-white transition-colors">
-                contato@bellaimagem.com.br
+              <a href="mailto:suporte@usinadotempo.com.br" className="hover:text-bella-white transition-colors">
+                suporte@usinadotempo.com.br
               </a>
             </p>
           </div>
