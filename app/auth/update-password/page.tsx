@@ -59,7 +59,9 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-3">
-            <NextImage src="/logo.png" alt="Bella Imagem" width={180} height={54} className="object-contain" priority />
+            <div className="px-6 py-3 rounded-2xl" style={{ background: '#1a1a1a' }}>
+              <NextImage src="/logo.png" alt="Bella Imagem" width={160} height={48} className="object-contain" priority />
+            </div>
           </div>
           <p className="text-sm text-bella-gray">Crie sua senha de acesso</p>
         </div>

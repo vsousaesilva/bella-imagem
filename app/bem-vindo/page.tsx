@@ -38,15 +38,16 @@ export default async function BemVindoPage({ searchParams }: PageProps) {
       <div className="w-full max-w-lg relative z-10 text-center">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <NextImage
-            src="/logo.png"
-            alt="Bella Imagem"
-            width={160}
-            height={48}
-            className="object-contain"
-            priority
-          />
-        </div>
+          <div className="px-6 py-3 rounded-2xl" style={{ background: '#1a1a1a' }}>
+            <NextImage
+              src="/logo.png"
+              alt="Bella Imagem"
+              width={160}
+              height={48}
+              className="object-contain"
+              priority
+            />
+          </div>
 
         {/* Ícone de sucesso */}
         <div className="flex justify-center mb-6">

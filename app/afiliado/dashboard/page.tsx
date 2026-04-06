@@ -68,7 +68,9 @@ export default async function AfiliadoDashboardPage() {
       {/* Header */}
       <div style={{ background: 'var(--main-bg-subtle)', borderBottom: '1px solid var(--main-border)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <NextImage src="/logo.png" alt="Bella Imagem" width={140} height={42} className="object-contain" />
+          <div className="px-4 py-2 rounded-xl" style={{ background: '#1a1a1a' }}>
+            <NextImage src="/logo.png" alt="Bella Imagem" width={120} height={36} className="object-contain" />
+          </div>
           <div className="flex items-center gap-4">
             <span className="text-xs text-bella-gray">Painel de Afiliado</span>
             <LogoutButton />
