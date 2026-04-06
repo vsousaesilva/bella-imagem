@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import NextImage from 'next/image'
+import { ThemeLogoStatic } from '@/components/theme-logo'
 import { Check, Zap } from 'lucide-react'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -101,9 +101,7 @@ export default async function PlanosPage({
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
-            <div className="px-6 py-3 rounded-2xl" style={{ background: '#1a1a1a' }}>
-              <NextImage src="/logo.png" alt="Bella Imagem" width={160} height={48} className="object-contain" priority />
-            </div>
+            <ThemeLogoStatic width={160} height={48} priority />
           </div>
           <h1 className="text-3xl font-display font-bold tracking-tight" style={{ color: '#ffffff' }}>
             Escolha seu plano

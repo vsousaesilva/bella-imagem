@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import NextImage from 'next/image'
+import { ThemeLogo } from '@/components/theme-logo'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import type { PlanType } from '@/lib/types'
 
@@ -118,16 +118,7 @@ function RegisterForm() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <div className="px-6 py-3 rounded-2xl" style={{ background: '#1a1a1a' }}>
-              <NextImage
-                src="/logo.png"
-                alt="Bella Imagem"
-                width={160}
-                height={48}
-                className="object-contain"
-                priority
-              />
-            </div>
+            <ThemeLogo width={160} height={48} priority />
           </div>
           <p className="text-sm text-bella-gray">Geração de imagens para moda com IA</p>
         </div>

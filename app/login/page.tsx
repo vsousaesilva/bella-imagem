@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import NextImage from 'next/image'
+import { ThemeLogo } from '@/components/theme-logo'
 import { AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
@@ -59,19 +59,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="flex justify-center mb-3">
-            <div
-              className="px-6 py-3 rounded-2xl"
-              style={{ background: '#1a1a1a' }}
-            >
-              <NextImage
-                src="/logo.png"
-                alt="Bella Imagem"
-                width={160}
-                height={48}
-                className="object-contain"
-                priority
-              />
-            </div>
+            <ThemeLogo width={160} height={48} priority />
           </div>
           <p className="text-sm text-bella-gray">Geração de imagens para moda com IA</p>
         </div>

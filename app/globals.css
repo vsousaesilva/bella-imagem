@@ -141,6 +141,12 @@ html.light {
     animation: shimmer 4s linear infinite;
   }
 
+  /* ── Logo temática ── */
+  .light-logo { display: none; }
+  .dark-logo  { display: block; }
+  html.light .light-logo { display: block; }
+  html.light .dark-logo  { display: none; }
+
   /* ── Divider gold ── */
   .divider-gold {
     height: 1px;

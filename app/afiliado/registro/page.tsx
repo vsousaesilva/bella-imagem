@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import NextImage from 'next/image'
+import { ThemeLogo } from '@/components/theme-logo'
 import { AlertCircle, CheckCircle, Users } from 'lucide-react'
 
 export default function AfiliadoRegistroPage() {
@@ -54,9 +54,7 @@ export default function AfiliadoRegistroPage() {
       <div className="w-full max-w-lg relative z-10">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-3">
-            <div className="px-6 py-3 rounded-2xl" style={{ background: '#1a1a1a' }}>
-              <NextImage src="/logo.png" alt="Bella Imagem" width={160} height={48} className="object-contain" priority />
-            </div>
+            <ThemeLogo width={160} height={48} priority />
           </div>
           <p className="text-sm text-bella-gray">Programa de Afiliados</p>
         </div>

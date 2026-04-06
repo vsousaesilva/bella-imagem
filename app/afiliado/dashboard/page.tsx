@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import NextImage from 'next/image'
+import { ThemeLogoStatic } from '@/components/theme-logo'
 import { TrendingUp, DollarSign, Users, Clock } from 'lucide-react'
 import { CopyButton } from '@/components/copy-button'
 import { LogoutButton } from '@/components/logout-button'
@@ -68,9 +68,7 @@ export default async function AfiliadoDashboardPage() {
       {/* Header */}
       <div style={{ background: 'var(--main-bg-subtle)', borderBottom: '1px solid var(--main-border)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="px-4 py-2 rounded-xl" style={{ background: '#1a1a1a' }}>
-            <NextImage src="/logo.png" alt="Bella Imagem" width={120} height={36} className="object-contain" />
-          </div>
+          <ThemeLogoStatic width={120} height={36} />
           <div className="flex items-center gap-4">
             <span className="text-xs text-bella-gray">Painel de Afiliado</span>
             <LogoutButton />

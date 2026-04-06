@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { Profile, Tenant } from '@/lib/types'
 import { PLAN_COLORS, PLAN_LABELS } from '@/lib/types'
-import Image from 'next/image'
+import { ThemeLogo } from '@/components/theme-logo'
 import { ThemeToggle } from '@/components/theme-toggle'
 import {
   ImageIcon,
@@ -71,15 +71,7 @@ export function Sidebar({ profile, tenant, mobileOpen = false, onMobileClose }: 
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <div className="flex-1 min-w-0">
-            <Image
-              src="/logo.png"
-              alt="Bella Imagem"
-              width={120}
-              height={36}
-              className="object-contain object-left"
-              style={{ maxHeight: 36 }}
-              priority
-            />
+            <ThemeLogo width={120} height={36} priority />
             {tenant && (
               <p className="text-[11px] text-[#6b6b6b] mt-1.5 truncate">{tenant.name}</p>
             )}

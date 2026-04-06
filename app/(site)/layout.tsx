@@ -1,5 +1,5 @@
-import NextImage from 'next/image'
 import Link from 'next/link'
+import { ThemeLogoStatic } from '@/components/theme-logo'
 
 const NAV_LINKS = [
   { href: '/planos', label: 'Planos' },
@@ -41,7 +41,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <header style={{ borderBottom: '1px solid var(--main-border)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/">
-            <NextImage src="/logo.png" alt="Bella Imagem" width={130} height={40} className="object-contain" />
+            <ThemeLogoStatic width={130} height={40} />
           </Link>
           <nav className="hidden sm:flex items-center gap-6">
             {NAV_LINKS.map(l => (
@@ -70,7 +70,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 sm:col-span-1">
-              <NextImage src="/logo.png" alt="Bella Imagem" width={120} height={36} className="object-contain mb-3" />
+              <ThemeLogoStatic width={120} height={36} />
               <p className="text-xs text-bella-gray leading-relaxed">
                 Geração de imagens profissionais de moda com inteligência artificial.
               </p>

@@ -1,4 +1,4 @@
-import NextImage from 'next/image'
+import { ThemeLogoStatic } from '@/components/theme-logo'
 import { CheckCircle, Mail, ArrowRight, Lock } from 'lucide-react'
 import type { PlanType } from '@/lib/types'
 
@@ -38,16 +38,7 @@ export default async function BemVindoPage({ searchParams }: PageProps) {
       <div className="w-full max-w-lg relative z-10 text-center">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <div className="px-6 py-3 rounded-2xl" style={{ background: '#1a1a1a' }}>
-            <NextImage
-              src="/logo.png"
-              alt="Bella Imagem"
-              width={160}
-              height={48}
-              className="object-contain"
-              priority
-            />
-          </div>
+          <ThemeLogoStatic width={160} height={48} priority />
         </div>
 
         {/* Ícone de sucesso */}
