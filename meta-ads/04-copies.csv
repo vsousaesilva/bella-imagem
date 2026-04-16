@@ -1,0 +1,16 @@
+id,angulo,formato,headline,primary_text,description,cta,observacoes,status
+BELLA_COPY_DOR_V1,dor,estatico,"[headline máx 40 char]","[primary text máx 125 char visíveis antes do 'ver mais' — total até 500]","[description máx 30 char]",Saiba mais,"[contexto de uso — ex.: topo/frio]",rascunho
+BELLA_COPY_DOR_V2,dor,estatico,"","","",Saiba mais,,rascunho
+BELLA_COPY_DOR_V3,dor,reel,"","","",Quero conhecer,,rascunho
+BELLA_COPY_DESEJO_V1,desejo,estatico,"","","",Agendar agora,,rascunho
+BELLA_COPY_DESEJO_V2,desejo,carrossel,"","","",Agendar agora,,rascunho
+BELLA_COPY_DESEJO_V3,desejo,reel,"","","",Saiba mais,,rascunho
+BELLA_COPY_PROVA_V1,prova_social,estatico,"","","",Ver depoimentos,,rascunho
+BELLA_COPY_PROVA_V2,prova_social,carrossel,"","","",Quero igual,,rascunho
+BELLA_COPY_PROVA_V3,prova_social,reel,"","","",Agendar avaliação,,rascunho
+BELLA_COPY_URGENCIA_V1,urgencia,estatico,"","","",Garantir vaga,,rascunho
+BELLA_COPY_URGENCIA_V2,urgencia,reel,"","","",Últimas unidades,,rascunho
+BELLA_COPY_AUTORIDADE_V1,autoridade,estatico,"","","",Saiba mais,,rascunho
+BELLA_COPY_AUTORIDADE_V2,autoridade,carrossel,"","","",Conhecer método,,rascunho
+BELLA_COPY_RMK_V1,remarketing,estatico,"","","",Finalizar agora,"fundo de funil — visitantes sem conversão",rascunho
+BELLA_COPY_RMK_V2,remarketing,reel,"","","",Voltar ao site,"fundo — carrinho abandonado",rascunho
